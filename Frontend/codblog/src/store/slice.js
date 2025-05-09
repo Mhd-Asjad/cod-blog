@@ -15,7 +15,7 @@ const authSlice = createSlice({
             state.access_token = action.payload.access_token;
             state.refresh_token = action.payload.refresh_token;
             state.user = action.payload.user;
-            state.is_login = True
+            state.is_login = true
         },
         removeLogin: (state) => {
             state.access_token = null;
