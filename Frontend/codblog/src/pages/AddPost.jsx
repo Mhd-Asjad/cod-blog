@@ -141,7 +141,6 @@ const AddPost = () => {
       }
 
       const payload = {
-        author: user?.id,
         content: savedContent,
         title: title,
       };
@@ -164,7 +163,7 @@ const AddPost = () => {
       <div className="p-6 dark:text-white font-montserrat">
         <div id="editorjs" className="editor-container" />
 
-        <div className="flex gap-5 mt-4">
+        <div className="flex justify-end mt-3">
           <button
             disabled={!canSave}
             onClick={handlePostSave}

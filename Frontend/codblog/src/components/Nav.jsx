@@ -62,7 +62,9 @@ const Nav = () => {
 
         {is_login ? (
           <div className="flex items-center gap-10">
-            <button className="w-9 h-9 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+            <button
+            onClick={() => navigate("/write-posts")}
+            className="w-9 h-9 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition">
               <Plus className="text-black dark:text-white group-hover:text-gray-500" size={18} />
             </button>
 
