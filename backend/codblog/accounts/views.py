@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
 # Create your views here.
 
+
+
 class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer

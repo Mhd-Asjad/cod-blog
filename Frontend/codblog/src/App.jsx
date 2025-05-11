@@ -2,7 +2,9 @@ import React from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import PublicRoute from "./routes/PublicRoute";
+import PrivateRoute from "./routes/PrivateRoute"
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import AddPost from "./pages/AddPost";
 
 
 const App = () => {
@@ -19,6 +21,7 @@ const App = () => {
             }
           />
           <Route path="/" element={<Home />} />
+          <Route path="/write-post" element={<PrivateRoute><AddPost /></PrivateRoute>} />
         </Routes>
       </Router>
     </div>

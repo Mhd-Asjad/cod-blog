@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { saveLogin } from "../store/slice";
 import Squares from "../components/Squares";
 import { useNavigate } from "react-router-dom";
-import {motion} from 'motion/react'
+import { motion } from "motion/react";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -110,15 +110,16 @@ const Login = () => {
     }
   };
   return (
-    <>
+    <div className=" h-screen relative overflow-hidden bg-black">
       <Squares />
       <motion.div
-      transition={{ duration : 1 }}
-      className="text-white absolute inset-0 flex justify-center items-center mx-2 md:mx-0">
+        transition={{ duration: 1 }}
+        className="text-white absolute inset-0 flex justify-center items-center mx-2 md:mx-0 "
+      >
         <ToastContainer />
-        <div className="bg-white/10 backdrop-blur-md max-w-4xl w-lg p-8 rounded-2xl shadow-2xl">
-          <h1 className="text-2xl text-white font-bold mb-6 uppercase text-center">
-            {isLogin ? "Welcome Back" : "Join Us"}
+        <div className="bg-white/10 dark:bg-white/5 backdrop-blur-md max-w-4xl w-lg p-8 rounded-2xl shadow-2xl">
+        <h1 className="text-2xl text-white dark:text-gray-100 font-bold mb-6 uppercase text-center">
+        {isLogin ? "Welcome Back" : "Join Us"}
           </h1>
           <Formik
             initialValues={isLogin ? initialLoginData : initialSignupData}
@@ -140,8 +141,8 @@ const Login = () => {
                       name="username"
                       type="text"
                       placeholder="username_123"
-                      className="w-full p-3 rounded-lg bg-gray-200/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
-                    />
+                      className="w-full p-3 rounded-lg bg-gray-200/20 dark:bg-gray-800/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                      />
                     <ErrorMessage
                       name="username"
                       component="div"
@@ -161,8 +162,8 @@ const Login = () => {
                     name="email"
                     type="email"
                     placeholder="you@example.com"
-                    className="w-full p-3 rounded-lg bg-gray-200/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
-                  />
+                    className="w-full p-3 rounded-lg bg-gray-200/20 dark:bg-gray-800/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                    />
                   <ErrorMessage
                     name="email"
                     component="div"
@@ -183,8 +184,8 @@ const Login = () => {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Your secret spell..."
-                      className="w-full p-3 rounded-lg bg-gray-200/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
-                    />
+                      className="w-full p-3 rounded-lg bg-gray-200/20 dark:bg-gray-800/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                      />
                     <div
                       className="absolute top-9 right-3 cursor-pointer text-gray-400"
                       onClick={() => setShowPassword(!showPassword)}
@@ -211,8 +212,8 @@ const Login = () => {
                         name="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
-                        className="w-full p-3 rounded-lg bg-gray-200/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
-                      />
+                        className="w-full p-3 rounded-lg bg-gray-200/20 dark:bg-gray-800/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                        />
                       <div
                         className="absolute top-10 right-3 cursor-pointer text-gray-400"
                         onClick={() => setShowPassword(!showPassword)}
@@ -242,8 +243,8 @@ const Login = () => {
                         name="confirm_password"
                         type={showconfirm_password ? "text" : "password"}
                         placeholder="confirm_password"
-                        className="w-full p-3 rounded-lg bg-gray-200/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
-                      />
+                        className="w-full p-3 rounded-lg bg-gray-200/20 dark:bg-gray-800/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                        />
                       <div
                         className="absolute top-10 right-3 cursor-pointer text-gray-400"
                         onClick={() =>
@@ -267,7 +268,7 @@ const Login = () => {
 
                 <button
                   type="submit"
-                  className="p-3 text-center w-full bg-violet-500 text-white rounded-lg mt-3 transform transition-all duration-300 
+                  className="p-3 text-center w-full bg-gray-800 border-white text-white rounded-lg mt-3 transform transition-all duration-300 
             hover:bg-violet-700 active:scale-95 cursor-pointer"
                 >
                   {isLogin
@@ -282,18 +283,18 @@ const Login = () => {
             )}
           </Formik>
 
-          <p className="mt-6 text-center cursor-pointer text-gray-400 text-sm">
-            {isLogin ? "No account yet?" : "Got an account?"}{" "}
+          <p className="mt-6 text-center cursor-pointer text-gray-400 dark:text-gray-300 text-sm">
+          {isLogin ? "No account yet?" : "Got an account?"}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-purple-400 hover:underline"
+              className="text-purple-300 hover:underline"
             >
               {isLogin ? "Sign Up" : "Log In"}
             </button>
           </p>
         </div>
       </motion.div>
-    </>
+    </div>
   );
 };
 
