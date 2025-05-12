@@ -5,8 +5,8 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const Nav = () => {
-  const { is_login } = useSelector((state) => state.auth)
-  const navigate = useNavigate()
+  const { is_login, user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem("theme");
     return saved
@@ -28,7 +28,10 @@ const Nav = () => {
   return (
     <nav className="flex items-center justify-between px-6 md:px-19 py-5 bg-zinc-100 border-b-2 border-gray-300 dark:bg-gray-800 transition-colors duration-300">
       <div>
-        <p className="text-black dark:text-white font-montserrat-extrabold text-xl md:text-3xl">
+        <p
+          onClick={() => navigate("/")}
+          className="text-black dark:text-white font-montserrat-extrabold text-xl md:text-3xl cursor-pointer"
+        >
           CODBLOG
         </p>
       </div>
@@ -39,7 +42,10 @@ const Nav = () => {
           className="w-full px-10 py-2 rounded-full border border-gray-400 dark:border-gray-600 dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white focus:outline-none dark:focus:ring-1 dark:focus:ring-purple-400 font-montserrat tracking-wider"
           placeholder="Search"
         />
-        <Search className="absolute top-2.5 left-3 text-gray-500 dark:text-white" size={18} />
+        <Search
+          className="absolute top-2.5 left-3 text-gray-500 dark:text-white"
+          size={18}
+        />
       </div>
 
       <div className="flex items-center gap-6">
@@ -63,13 +69,31 @@ const Nav = () => {
         {is_login ? (
           <div className="flex items-center gap-10">
             <button
-            onClick={() => navigate("/write-posts")}
-            className="w-9 h-9 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-              <Plus className="text-black dark:text-white group-hover:text-gray-500" size={18} />
+              onClick={() => navigate("/write-posts")}
+              className="w-9 h-9 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            >
+              <Plus
+                className="text-black dark:text-white group-hover:text-gray-500"
+                size={18}
+              />
             </button>
 
-            <button className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-              <User className="text-black dark:text-white group-hover:text-gray-500" size={18} />
+            <button
+              onClick={() => navigate(`/view-profile/${user.id}`)}
+              className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition overflow-hidden"
+            >
+              {user?.profile_image ? (
+                <img
+                  src={`http://localhost:8000${user.profile_image}`}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <User
+                  className="text-black dark:text-white group-hover:text-gray-500"
+                  size={18}
+                />
+              )}
             </button>
           </div>
         ) : (

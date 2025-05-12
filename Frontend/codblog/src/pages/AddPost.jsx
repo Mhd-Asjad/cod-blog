@@ -8,18 +8,21 @@ import Embed from "@editorjs/embed";
 import Quote from "@editorjs/quote";
 import useApi from "../components/useApi";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddPost = () => {
   const api = useApi();
+  const navigate = useNavigate()
   const ejsInstance = useRef(null);
   const [canSave, setCanSave] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // if (!user) {
-    //   console.log('No user found')
-    //   return;
-    // }
+    if (!user) {
+      console.log('No user found')
+      return;
+    }
 
     const timer = setTimeout(() => {
       if (!ejsInstance.current) {
@@ -72,9 +75,7 @@ const AddPost = () => {
                   byFile: "http://localhost:8000/api/posts/upload-image/",
                   byUrl: "http://localhost:8000/api/posts/fetch-url/",
                 },
-                field: user?.username
-                  ? `${user.username}-post-image`
-                  : "post-image",
+                field : 'image',
                 types: "image/*",
               },
             },
@@ -150,7 +151,9 @@ const AddPost = () => {
       const response = await api.post("posts/create-posts/", payload);
 
       if (response.status === 201) {
+        toast.success("You have published a new post.")
         console.log(`Post saved successfully 🎉🎉🎉🎉`);
+        navigate("/")
       }
     } catch (error) {
       console.error(`Error while saving post: ${error}`);
@@ -169,8 +172,8 @@ const AddPost = () => {
             onClick={handlePostSave}
             className={`px-4 py-2 rounded-md transition-all duration-300 cursor-pointer ${
               canSave
-                ? "bg-green-500 hover:bg-green-600 text-white"
-                : "bg-green-700 text-gray-200 cursor-not-allowed"
+                ? "bg-green-500 hover:bg-green-600 text-white dark:bg-purple-400 dark:hover:bg-purple-500"
+                : "bg-green-700 text-gray-200 dark:bg-purple-500 cursor-not-allowed"
             }`}
           >
             Publish Post

@@ -25,6 +25,10 @@ class CustomuserManager(UserManager):
     
 class CustomUser(AbstractUser) :
     email = models.EmailField(max_length=200 , unique=True)
+    profile_image = models.ImageField(
+        upload_to='profile_images/',
+        null=True, blank=True
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     
