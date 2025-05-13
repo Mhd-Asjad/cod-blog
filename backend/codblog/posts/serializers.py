@@ -15,6 +15,10 @@ class PostSerializer(serializers.ModelSerializer):
     def get_user_profile(self, obj):
         return obj.author.profile_image.url if obj.author.profile_image else None
 
+class PostEditSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Post
+        fields = ['title'  , 'content']
 
 class HomePostSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="author.id", read_only=True)

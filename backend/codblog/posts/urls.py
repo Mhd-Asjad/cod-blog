@@ -8,4 +8,5 @@ urlpatterns = [
     path("fetch-url/", fetch_url, name="fetch-url"),
     path("list-posts/", ListPostView.as_view(), name="list-posts"),
     path("show-post/<int:pk>/", ShowPostDetailView.as_view(), name="show-post"),
+    path("edit-post/<int:pk>/" , EditPost.as_view(), name='edit-post')
 ]
