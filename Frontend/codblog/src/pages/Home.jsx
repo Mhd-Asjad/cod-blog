@@ -5,6 +5,7 @@ import { HashLoader } from "react-spinners";
 import { motion } from "motion/react";
 import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Home = () => {
   const api = useApi();
@@ -22,6 +23,7 @@ const Home = () => {
         }
       } catch (error) {
         console.error(`Error while fetching the posts : ${error}`);
+        toast.error("Failed to fetch post, please try again.")
       } finally {
         setLoading(false);
       }
@@ -91,7 +93,7 @@ const Home = () => {
           {posts.map((post, index) => (
             <>
               <motion.div
-                key={index}
+                key={post.id}
                 variants={postVariants}
                 onClick={() => handlePostClick(post.id)}
                 className="bg-white dark:bg-gray-700 cursor-pointer rounded-xl shadow-md overflow-hidden transform hover:bg-zinc-100 dark:hover:bg-gray-600 transition-all duration-300 hover:shadow-lg"
@@ -121,7 +123,7 @@ const Home = () => {
                   </h2>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-sm text-gray-500 dark:text-gray-300">
-                      {new Date().toLocaleDateString()}
+                      {new Date(post.created_at).toLocaleDateString()}
                     </span>
                   </div>
                 </div>

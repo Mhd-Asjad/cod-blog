@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, generics
-from .serializers import PostSerializer
+from .serializers import HomePostSerializer, PostSerializer
 from django.contrib.auth import get_user_model
 from .models import Post
 import logging
@@ -74,7 +74,7 @@ def fetch_url(request):
 class ListPostView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = []
-    serializer_class = PostSerializer
+    serializer_class = HomePostSerializer
     queryset = Post.objects.all().order_by("-created_at")
 
 
