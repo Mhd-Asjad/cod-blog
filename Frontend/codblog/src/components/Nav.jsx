@@ -3,6 +3,7 @@ import { Plus, Search, User } from "lucide-react";
 import * as motion from "motion/react-client";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import GlitchText from "./Glitch";
 
 const Nav = () => {
   const { is_login, user } = useSelector((state) => state.auth);
@@ -28,12 +29,20 @@ const Nav = () => {
   return (
     <nav className="flex items-center justify-between px-6 md:px-19 py-5 bg-zinc-100 border-b-2 border-gray-300 dark:bg-gray-800 transition-colors duration-300">
       <div>
-        <p
+        {/* <p
           onClick={() => navigate("/")}
           className="text-black dark:text-white font-montserrat-extrabold text-xl md:text-3xl cursor-pointer"
         >
           CODBLOG
-        </p>
+        </p> */}
+        <GlitchText
+          speed={1}
+          enableShadows={true}
+          enableOnHover={false}
+          className="custom-class"
+        >
+          CODBLOG
+        </GlitchText>
       </div>
 
       <div className="relative w-44 md:w-64">

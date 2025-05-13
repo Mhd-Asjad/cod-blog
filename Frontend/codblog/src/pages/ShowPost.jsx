@@ -9,20 +9,21 @@ import Nav from "../components/Nav";
 const renderBlock = (block) => {
   switch (block.type) {
     case "header":
-      const headingTag = `h${block.data.level || 1}`;
-      return (
-        <headingTag
-          key={block.id}
-          className={`${
+      const Tag = `h${block.data.level || 1}`;
+      return React.createElement(
+        Tag,
+        {
+          key: block.id,
+          className: ` ${
             block.data.level === 1
-              ? "text-3xl font-extrabold"
+              ? "text-3xl font-montserrat-extrabold"
               : block.data.level === 2
-              ? "text-2xl font-bold"
-              : "text-xl font-semibold"
-          } dark:text-white my-4`}
-        >
-          {block.data.text}
-        </headingTag>
+              ? "text-2xl font-bold font-montserrat"
+              : "text-xl font-semibold font-montserrat-extrabold"
+          } mb-6 dark:text-white
+          `,
+        },
+        block.data.text
       );
     case "paragraph":
       return (
