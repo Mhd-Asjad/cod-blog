@@ -37,3 +37,20 @@
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+
+h1 {
+  font-size: 3rem;
+  font-weight:bolder;
+  letter-spacing: 2px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: bolder;
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: bolder;
+}

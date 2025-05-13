@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
 # Create your views here.
 
+
+
 class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer
@@ -34,7 +36,8 @@ class UserLoginView(APIView):
                 'user': {
                     'id' : user.id,
                     'email' : user.email,
-                    'username' : user.username
+                    'username' : user.username,
+                    'profile_image' : (user.profile_image.url) if user.profile_image else None
                 }, 'message' : 'login successfull'}, status=status.HTTP_200_OK)
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

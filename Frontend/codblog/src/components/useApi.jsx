@@ -12,8 +12,9 @@ const useApi = () => {
 
     instance.interceptors.request.use(
       (config) => {
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        const tokenFromRedux = token;
+        if (tokenFromRedux) {
+          config.headers.Authorization = `Bearer ${tokenFromRedux}`;
         }
         return config;
       },
@@ -26,4 +27,4 @@ const useApi = () => {
   return api
 };
 
-export default useApi
+export default useApi;
