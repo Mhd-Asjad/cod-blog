@@ -1,19 +1,22 @@
 from rest_framework import serializers
 from .models import Post
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "profile_image", "email"]
 
 
 class PostSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="author.id", read_only=True)
-    username = serializers.CharField(source="author.username", read_only=True)
-    user_profile = serializers.SerializerMethodField()
+    author = AuthorSerializer(read_only=True)
 
     class Meta:
         model = Post
         fields = "__all__"
-        read_only_fields = ["author"]
-
-    def get_user_profile(self, obj):
-        return obj.author.profile_image.url if obj.author.profile_image else None
 
 class PostEditSerializer(serializers.ModelSerializer):
     class Meta :
@@ -21,22 +24,31 @@ class PostEditSerializer(serializers.ModelSerializer):
         fields = ['title'  , 'content']
 
 class HomePostSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="author.id", read_only=True)
-    username = serializers.CharField(source="author.username", read_only=True)
-    user_profile = serializers.SerializerMethodField()
+    author = AuthorSerializer(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             "id",
-            "user_id",
-            "username",
-            "user_profile",
+            "author",
             "title",
             "like",
             "dislike",
             "created_at",
         ]
 
-    def get_user_profile(self, obj):
-        return obj.author.profile_image.url if obj.author.profile_image else None
+
+class SimplePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ["id", "title", "created_at"]
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    posts = SimplePostSerializer(source="post_set", many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "profile_image", "posts", 'bio']
+
+

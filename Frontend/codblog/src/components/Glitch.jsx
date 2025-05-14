@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import './glitch.css'
 const GlitchText = ({
   children,
@@ -6,6 +7,7 @@ const GlitchText = ({
   enableOnHover = true,
   className = '',
 }) => {
+  const navigate = useNavigate()
   const inlineStyles = {
     '--after-duration': `${speed * 3}s`,
     '--before-duration': `${speed * 2}s`,
@@ -17,6 +19,7 @@ const GlitchText = ({
 
   return (
     <div
+    onClick={() => navigate("/")}
       className={`glitch ${hoverClass} ${className}`}
       style={inlineStyles}
       data-text={children}

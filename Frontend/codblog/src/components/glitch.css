@@ -1,6 +1,6 @@
 .glitch {
   color: #000;
-  font-size: 50px;
+  font-size: 35px;
   white-space: nowrap;
   font-weight: 900;
   position: relative;
@@ -23,12 +23,12 @@
 .dark .glitch::after,
 .dark .glitch::before {
   color: #fff;
-  background-color: #1E2838;
+  background-color: #1e2838;
 }
 
 .glitch:not(.enable-on-hover)::after {
   left: 10px;
-  text-shadow: var(--after-shadow, -10px 0 red);
+  text-shadow: var(--after-shadow, -10px 0 rgb(179, 16, 179));
   animation: animate-glitch var(--after-duration, 3s) infinite linear
     alternate-reverse;
 }
@@ -50,7 +50,7 @@
   content: attr(data-text);
   opacity: 1;
   left: 10px;
-  text-shadow: var(--after-shadow, -10px 0 red);
+  text-shadow: var(--after-shadow, -10px 0 rgb(179, 16, 179));
   animation: animate-glitch var(--after-duration, 3s) infinite linear
     alternate-reverse;
 }
@@ -128,5 +128,3 @@
     clip-path: inset(30% 0 40% 0);
   }
 }
-
-

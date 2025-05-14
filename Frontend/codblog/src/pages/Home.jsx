@@ -12,24 +12,37 @@ const Home = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nextPage, setNextPage] = useState(null);
+  const [prevPage, setPrevPage] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await api.get("posts/list-posts/");
-        if (response.status === 200) {
-          setPosts(response.data);
-          console.log(`This is the posts === ${JSON.stringify(response.data)}`);
-        }
-      } catch (error) {
-        console.error(`Error while fetching the posts : ${error}`);
-        toast.error("Failed to fetch post, please try again.")
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPosts();
   }, []);
+
+  const fetchPosts = async (url = "posts/list-posts/") => {
+    try {
+      const relativeUrl = url.startsWith("http")
+        ? url.replace("http://localhost:8000/", "")
+        : url;
+
+      const response = await api.get(relativeUrl);
+      if (response.status === 200) {
+        setPosts(response.data.results);
+        setNextPage(response.data.next);
+        setPrevPage(response.data.previous);
+
+        // Update current page from the URL
+        const pageMatch = relativeUrl.match(/page=(\d+)/);
+        setCurrentPage(pageMatch ? parseInt(pageMatch[1]) : 1);
+      }
+    } catch (error) {
+      console.error("Error fetching posts", error);
+      toast.error("Couldn't load posts");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,12 +60,12 @@ const Home = () => {
     visible: {
       opacity: 1,
       y: 0,
-      duration : 0.5,
+      duration: 0.5,
       transition: {
         type: "spring",
         damping: 15,
         stiffness: 100,
-        duration : 0.5
+        duration: 0.5,
       },
     },
   };
@@ -89,21 +102,23 @@ const Home = () => {
     <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
       <Nav />
       <motion.div className="px-4  max-w-5xl mx-auto">
-        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1 mt-20 mx-20">
+        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1 mt-20 mx-20 ">
           {posts.map((post, index) => (
-            <>
+            <div
+              key={index}
+              className=""
+            >
               <motion.div
-                key={post.id}
                 variants={postVariants}
                 onClick={() => handlePostClick(post.id)}
-                className="bg-white dark:bg-gray-700 cursor-pointer rounded-xl shadow-md overflow-hidden transform hover:bg-zinc-100 dark:hover:bg-gray-600 transition-all duration-300 hover:shadow-lg"
+                className="bg-white dark:bg-gray-700 cursor-pointer rounded-xl shadow-md overflow-hidden transform hover:bg-zinc-100 dark:hover:bg-gray-600 transition-all duration-300 hover:shadow-lg mb-5"
               >
                 <div className="p-6">
                   <div className="flex items-center gap-3">
-                    {post.user_profile ? (
+                    {post.author.profile_image ? (
                       <img
                         className="w-12 h-12 border-2 border-purple-300 dark:border-purple-500 object-cover rounded-full shadow-sm"
-                        src={`http://localhost:8000${post.user_profile}`}
+                        src={`${post.author.profile_image}`}
                         alt="user-profile"
                       />
                     ) : (
@@ -112,10 +127,10 @@ const Home = () => {
                       </div>
                     )}
                     <span
-                      onClick={(e) => handleUsernameClick(e, post.user_id)}
+                      onClick={(e) => handleUsernameClick(e, post.author.id)}
                       className="font-bold tracking-wide text-gray-800 dark:text-white hover:underline"
                     >
-                      {post.username}
+                      {post.author.username}
                     </span>
                   </div>
                   <h2 className="text-2xl font-extrabold font-montserrat mb-2 text-gray-900 dark:text-white">
@@ -123,7 +138,11 @@ const Home = () => {
                   </h2>
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-sm text-gray-500 dark:text-gray-300">
-                      {new Date(post.created_at).toLocaleDateString()}
+                      {new Date(post.created_at).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                 </div>
@@ -138,10 +157,39 @@ const Home = () => {
                   variants={lineVariants}
                 />
               </motion.div>
-            </>
+            </div>
           ))}
         </div>
       </motion.div>
+      <div className="flex justify-center mt-10 gap-6">
+        {prevPage && (
+          <button
+            onClick={() => fetchPosts(prevPage)}
+            className="px-5 py-2 rounded-lg text-sm font-medium shadow 
+                 bg-purple-500 text-white hover:bg-purple-600 
+                 dark:bg-purple-700 dark:hover:bg-purple-800 
+                 transition-all duration-300"
+          >
+            ← Previous
+          </button>
+        )}
+        {prevPage && nextPage && (
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            Page {currentPage}
+          </span>
+        )}
+        {nextPage && (
+          <button
+            onClick={() => fetchPosts(nextPage)}
+            className="px-5 py-2 rounded-lg text-sm font-medium shadow 
+                 bg-purple-500 text-white hover:bg-purple-600 
+                 dark:bg-purple-700 dark:hover:bg-purple-800 
+                 transition-all duration-300"
+          >
+            Next →
+          </button>
+        )}
+      </div>
     </div>
   );
 };
