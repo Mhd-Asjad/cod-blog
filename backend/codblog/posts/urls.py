@@ -8,4 +8,7 @@ urlpatterns = [
     path("fetch-url/", fetch_url, name="fetch-url"),
     path("list-posts/", ListPostView.as_view(), name="list-posts"),
     path("show-post/<int:pk>/", ShowPostDetailView.as_view(), name="show-post"),
+    path("public-profile/<int:user_id>/", ShowUserProfileView.as_view(), name="public-profile"),
+    path("author-profile/", AuthorProfileView.as_view(), name='author-profile'),
+    path("delete-post/<int:pk>/", delete_post, name="delete-post")
 ]

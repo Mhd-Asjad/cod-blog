@@ -4,6 +4,7 @@ import useApi from "../components/useApi";
 import { HashLoader } from "react-spinners";
 import { motion } from "motion/react";
 import { User, Calendar, Mail, MapPin } from "lucide-react";
+import Nav from "../components/Nav";
 
 const ShowUserDetail = () => {
   const { id } = useParams();
@@ -14,28 +15,28 @@ const ShowUserDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchUserDetails = async () => {
-  //     try {
-  //       const userResponse = await api.get(`users/profile/${id}/`);
-  //       const postsResponse = await api.get(`posts/user-posts/${id}/`);
-        
-  //       if (userResponse.status === 200 && postsResponse.status === 200) {
-  //         setUser(userResponse.data);
-  //         setUserPosts(postsResponse.data);
-  //         console.log(`User details: ${JSON.stringify(userResponse.data)}`);
-  //         console.log(`User posts: ${JSON.stringify(postsResponse.data)}`);
-  //       }
-  //     } catch (error) {
-  //       console.error(`Error while fetching user details: ${error}`);
-  //       setError(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userResponse = await api.get(`posts/public-profile/${id}/`);
 
-  //   fetchUserDetails();
-  // }, [id]);
+        if (userResponse.status === 200) {
+          const fetchedUser = userResponse.data[0];
+          setUser(fetchedUser);
+          setUserPosts(fetchedUser.posts);
+          console.log(`User details: ${JSON.stringify(fetchedUser)}`);
+          console.log(`User Posts: ${JSON.stringify(fetchedUser.posts)}`);
+        }
+      } catch (error) {
+        console.error(`Error while fetching user details: ${error}`);
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, [id]);
 
   const handlePostClick = (postId) => {
     navigate(`/post/${postId}`);
@@ -66,42 +67,37 @@ const ShowUserDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+    <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+      <Nav />
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8"
         >
           <div className="flex flex-col items-center mb-8">
-            {user.profile_picture ? (
+            {user.profile_image ? (
               <img
-                className="w-24 h-24 border-4 border-purple-300 dark:border-purple-500 object-cover rounded-full shadow-lg mb-4"
-                src={`http://localhost:8000${user.profile_picture}`}
-                alt={`${user.username}'s profile`}
+                src={`${user.profile_image}`}
+                alt="Profile"
+                className="w-24 h-24 border-4  border-purple-300 dark:border-purple-500 rounded-full object-cover mb-4"
               />
             ) : (
-              <div className="flex items-center justify-center w-24 h-24 bg-purple-100 dark:bg-purple-600 text-purple-700 dark:text-white border-4 border-purple-300 dark:border-purple-500 rounded-full shadow-lg mb-4">
-                <User size={48} />
+              <div className="w-24 h-24 border dark:border-0 dark:bg-purple-600 rounded-full flex items-center justify-center mb-4">
+                <User size={40} className="text-black dark:text-white" />
               </div>
             )}
-            
+
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {user.full_name || user.username}
+              {user.username}
             </h1>
-            
+
             <div className="flex items-center text-gray-600 dark:text-gray-300 space-x-4">
               {user.email && (
                 <div className="flex items-center">
                   <Mail size={16} className="mr-2" />
                   <span>{user.email}</span>
-                </div>
-              )}
-              {user.location && (
-                <div className="flex items-center">
-                  <MapPin size={16} className="mr-2" />
-                  <span>{user.location}</span>
                 </div>
               )}
             </div>
@@ -118,7 +114,8 @@ const ShowUserDetail = () => {
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
               Posts by {user.username}
             </h2>
-            
+
+            <div className="mt-20">
             {userPosts.length === 0 ? (
               <p className="text-center text-gray-500 dark:text-gray-400">
                 No posts yet.
@@ -140,13 +137,18 @@ const ShowUserDetail = () => {
                       </h3>
                       <div className="flex items-center text-sm text-gray-500 dark:text-gray-300">
                         <Calendar size={16} className="mr-2" />
-                        {new Date(post.created_at).toLocaleDateString()}
+                        {new Date(post.created_at).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
                       </div>
                     </div>
                   </motion.div>
                 ))}
               </div>
             )}
+            </div>
           </div>
         </motion.div>
       </div>

@@ -7,14 +7,23 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, generics
-from .serializers import HomePostSerializer, PostSerializer
+from .serializers import (
+    HomePostSerializer,
+    PostSerializer,
+    UserProfileSerializer,
+)
 from django.contrib.auth import get_user_model
+from rest_framework.pagination import PageNumberPagination
 from .models import Post
 import logging
 
 User = get_user_model()
 MAX_IMAGE_SIZE = 5  # MB
 logger = logging.getLogger(__name__)
+
+
+class CustomPaginationClass(PageNumberPagination):
+    page_size = 15
 
 
 class CreatePostView(APIView):
@@ -75,6 +84,7 @@ class ListPostView(generics.ListAPIView):
     permission_classes = [AllowAny]
     authentication_classes = []
     serializer_class = HomePostSerializer
+    pagination_class = CustomPaginationClass
     queryset = Post.objects.all().order_by("-created_at")
 
 
@@ -91,3 +101,49 @@ class ShowPostDetailView(APIView):
             return Response(
                 {"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class ShowUserProfileView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = UserProfileSerializer
+    lookup_url_kwarg = "user_id"
+    def get_queryset(self):
+        user_id = self.kwargs.get(self.lookup_url_kwarg)
+        return User.objects.filter(id=user_id)
+
+
+
+class AuthorProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        try:
+
+            user = request.user
+            serializer = UserProfileSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_post(request, pk):
+    try:
+        post = Post.objects.get(pk=pk, author=request.user)
+        post.delete()
+        return Response({"message": "Post deleted successfully"})
+    except Post.DoesNotExist:
+        return Response({"error": "Post not found or unauthorized"}, status=404)

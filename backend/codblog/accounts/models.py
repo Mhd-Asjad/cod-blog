@@ -29,6 +29,7 @@ class CustomUser(AbstractUser) :
         upload_to='profile_images/',
         null=True, blank=True
     )
+    bio = models.TextField(null=True, blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     

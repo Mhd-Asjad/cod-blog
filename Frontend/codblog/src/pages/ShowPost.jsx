@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useApi from "../components/useApi";
 import { HashLoader } from "react-spinners";
 import { motion } from "motion/react";
@@ -100,6 +100,7 @@ const renderBlock = (block) => {
 const ShowPost = () => {
   const { id } = useParams();
   const api = useApi();
+  const navigate = useNavigate()
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -159,10 +160,10 @@ const ShowPost = () => {
         >
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
-              {post.user_profile ? (
+              {post.author.profile_image ? (
                 <img
                   className="w-12 h-12 border-2 border-purple-300 dark:border-purple-500 object-cover rounded-full shadow-sm"
-                  src={`http://localhost:8000${post.user_profile}`}
+                  src={`http://localhost:8000${post.author.profile_image}`}
                   alt="user-profile"
                 />
               ) : (
@@ -171,12 +172,17 @@ const ShowPost = () => {
                 </div>
               )}
               <div>
-                <span className="font-bold text-gray-800 dark:text-white block">
-                  {post.username}
+                <span
+                onClick={() => navigate(`/user/${post.author.id}`)}
+                className="font-bold cursor-pointer text-gray-800 dark:text-white block hover:underline">
+                  {post.author.username}
                 </span>
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <Calendar size={16} className="mr-2" />
-                  {new Date(post.created_at).toLocaleDateString()}
+                  {new Date(post.created_at).toLocaleString(
+                    "en-US", {year : "numeric", month : "short", day :"numeric"}
+                  )}
+                  
                 </div>
               </div>
             </div>
