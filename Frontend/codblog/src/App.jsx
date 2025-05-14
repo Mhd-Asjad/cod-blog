@@ -10,6 +10,7 @@ import ShowUserDetail from "./pages/ShowUserDetail";
 import AuthProvider from "./components/AuthProvider";
 import { ToastContainer } from "react-toastify";
 import UserProfile from "./pages/UserProfile";
+import EditPost from "./pages/EditPost";
 
 const App = () => {
   return (
@@ -51,6 +52,16 @@ const App = () => {
                 </PrivateRoute>
               }
             />
+
+            <Route 
+              path="/edit-post/:id"
+              element={
+                <PrivateRoute>
+                  <EditPost/>
+                </PrivateRoute>
+              }
+            />
+            
           </Routes>
           <ToastContainer position="top-center" />
 

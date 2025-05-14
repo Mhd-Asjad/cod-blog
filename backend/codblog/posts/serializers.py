@@ -18,6 +18,10 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = "__all__"
 
+class PostEditSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Post
+        fields = ['title'  , 'content']
 
 class HomePostSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True)

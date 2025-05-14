@@ -7,11 +7,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, generics
-from .serializers import (
-    HomePostSerializer,
-    PostSerializer,
-    UserProfileSerializer,
-)
+
+from .serializers import *
 from django.contrib.auth import get_user_model
 from rest_framework.pagination import PageNumberPagination
 from .models import Post
@@ -40,11 +37,12 @@ class CreatePostView(APIView):
 
 @api_view(["POST"])
 @parser_classes([MultiPartParser])
-@permission_classes([AllowAny])
+# @permission_classes([IsAuthenticated])
 def upload_image(request):
     print(f"this is the request data : {request.data}")
     image = request.FILES.get("image")
     print(f"this is the image {image}")
+    
     if not image:
         return Response({"success": 0, "message": "No image found."})
 
@@ -57,7 +55,7 @@ def upload_image(request):
 
 
 @api_view(["POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def fetch_url(request):
     image_url = request.data.get("url")
     if not image_url:
@@ -85,8 +83,8 @@ class ListPostView(generics.ListAPIView):
     authentication_classes = []
     serializer_class = HomePostSerializer
     pagination_class = CustomPaginationClass
+    
     queryset = Post.objects.all().order_by("-created_at")
-
 
 class ShowPostDetailView(APIView):
     permission_classes = [AllowAny]
@@ -101,7 +99,6 @@ class ShowPostDetailView(APIView):
             return Response(
                 {"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND
             )
-
 
 class ShowUserProfileView(generics.ListAPIView):
     permission_classes = [AllowAny]
@@ -147,3 +144,26 @@ def delete_post(request, pk):
         return Response({"message": "Post deleted successfully"})
     except Post.DoesNotExist:
         return Response({"error": "Post not found or unauthorized"}, status=404)
+      
+class EditPost(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self , request , pk):
+        data = request.data
+        print(data)
+        try :
+            post = Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response({'error':'post not found'},status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = PostEditSerializer(instance=post , data=data , partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data , status=status.HTTP_200_OK)
+        
+        print(serializer.errors)
+        return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
+        
+
+        
