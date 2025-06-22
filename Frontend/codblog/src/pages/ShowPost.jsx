@@ -14,25 +14,26 @@ const renderBlock = (block) => {
         Tag,
         {
           key: block.id,
-          className: ` ${
+          className: `break-words ${
             block.data.level === 1
               ? "text-3xl font-montserrat-extrabold"
               : block.data.level === 2
               ? "text-2xl font-bold font-montserrat"
               : "text-xl font-semibold font-montserrat-extrabold"
-          } mb-6 dark:text-white
-          `,
+          } mb-6 dark:text-white`,
         },
         block.data.text
       );
+
     case "paragraph":
       return (
         <p
           key={block.id}
-          className="text-base text-black dark:text-white leading-relaxed pb-4"
+          className="text-base text-black dark:text-white leading-relaxed pb-4 break-words whitespace-pre-wrap"
           dangerouslySetInnerHTML={{ __html: block.data.text }}
         />
       );
+
     case "image":
       return (
         <div
@@ -45,7 +46,7 @@ const renderBlock = (block) => {
             className="w-full max-h-[600px] object-cover"
           />
           {block.data.caption && (
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 italic break-words">
               {block.data.caption}
             </p>
           )}
@@ -56,18 +57,19 @@ const renderBlock = (block) => {
       return (
         <pre
           key={block.id}
-          className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg overflow-x-auto text-sm"
+          className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg text-sm break-words whitespace-pre-wrap overflow-x-auto"
         >
           <code className="block text-black dark:text-white">
             {block.data.code}
           </code>
         </pre>
       );
+
     case "quote":
       return (
         <blockquote
           key={block.id}
-          className="border-l-4 border-purple-500 pl-4 py-2 my-4 italic text-gray-600 dark:text-gray-300"
+          className="border-l-4 border-purple-500 pl-4 py-2 my-4 italic text-gray-600 dark:text-gray-300 break-words whitespace-pre-wrap"
         >
           <p>{block.data.text}</p>
           {block.data.caption && (
@@ -100,7 +102,7 @@ const renderBlock = (block) => {
 const ShowPost = () => {
   const { id } = useParams();
   const api = useApi();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -153,7 +155,7 @@ const ShowPost = () => {
       <Nav />
       <div className="max-w-4xl mx-auto px-4 py-12">
         <motion.div
-          inital={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8"
@@ -173,22 +175,24 @@ const ShowPost = () => {
               )}
               <div>
                 <span
-                onClick={() => navigate(`/user/${post.author.id}`)}
-                className="font-bold cursor-pointer text-gray-800 dark:text-white block hover:underline">
+                  onClick={() => navigate(`/user/${post.author.id}`)}
+                  className="font-bold cursor-pointer text-gray-800 dark:text-white block hover:underline"
+                >
                   {post.author.username}
                 </span>
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <Calendar size={16} className="mr-2" />
-                  {new Date(post.created_at).toLocaleString(
-                    "en-US", {year : "numeric", month : "short", day :"numeric"}
-                  )}
-                  
+                  {new Date(post.created_at).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="prose dark:prose-invert max-w-none">
+          <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert max-w-none break-words">
             {post.content && post.content.blocks ? (
               post.content.blocks.map(renderBlock)
             ) : (

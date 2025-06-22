@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const Home = () => {
   const api = useApi();
@@ -16,11 +17,13 @@ const Home = () => {
   const [prevPage, setPrevPage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const sortBy = useSelector((state) => state.filter.sortBy);
+
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [sortBy]);
 
-  const fetchPosts = async (url = "posts/list-posts/") => {
+  const fetchPosts = async (url = `posts/list-posts/?sort=${sortBy}`) => {
     try {
       const relativeUrl = url.startsWith("http")
         ? url.replace("http://localhost:8000/", "")
@@ -32,7 +35,6 @@ const Home = () => {
         setNextPage(response.data.next);
         setPrevPage(response.data.previous);
 
-        // Update current page from the URL
         const pageMatch = relativeUrl.match(/page=(\d+)/);
         setCurrentPage(pageMatch ? parseInt(pageMatch[1]) : 1);
       }

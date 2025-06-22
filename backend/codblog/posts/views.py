@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from django.db.models import Q, Count
 from rest_framework.views import APIView
 from rest_framework import status, generics
 
@@ -42,7 +43,7 @@ def upload_image(request):
     print(f"this is the request data : {request.data}")
     image = request.FILES.get("image")
     print(f"this is the image {image}")
-    
+
     if not image:
         return Response({"success": 0, "message": "No image found."})
 
@@ -83,8 +84,27 @@ class ListPostView(generics.ListAPIView):
     authentication_classes = []
     serializer_class = HomePostSerializer
     pagination_class = CustomPaginationClass
-    
-    queryset = Post.objects.all().order_by("-created_at")
+
+    def get_queryset(self):
+        sort_by = self.request.query_params.get('sort', 'newest')
+
+        queryset = Post.objects.all()
+
+        if sort_by == 'newest':
+            queryset = queryset.order_by('-created_at')
+        elif sort_by == 'oldest':
+            queryset = queryset.order_by('created_at')
+        elif sort_by == 'most_liked':
+            queryset = queryset.annotate(like_count=Count('like')).order_by('-like_count', '-created_at')
+            print('most liked' ,queryset)
+        elif sort_by == 'least_liked':
+            queryset = queryset.annotate(like_count=Count('like')).order_by('like_count', 'created_at')
+            print('least liked' ,queryset)
+        else:
+            queryset = queryset.order_by('-created_at')
+
+        return queryset
+
 
 class ShowPostDetailView(APIView):
     permission_classes = [AllowAny]
@@ -100,14 +120,15 @@ class ShowPostDetailView(APIView):
                 {"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND
             )
 
+
 class ShowUserProfileView(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserProfileSerializer
     lookup_url_kwarg = "user_id"
+
     def get_queryset(self):
         user_id = self.kwargs.get(self.lookup_url_kwarg)
         return User.objects.filter(id=user_id)
-
 
 
 class AuthorProfileView(APIView):
@@ -132,7 +153,9 @@ class AuthorProfileView(APIView):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 @api_view(["DELETE"])
@@ -144,26 +167,42 @@ def delete_post(request, pk):
         return Response({"message": "Post deleted successfully"})
     except Post.DoesNotExist:
         return Response({"error": "Post not found or unauthorized"}, status=404)
-      
+
+
 class EditPost(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self , request , pk):
+    def put(self, request, pk):
         data = request.data
         print(data)
-        try :
+        try:
             post = Post.objects.get(pk=pk)
         except Post.DoesNotExist:
-            return Response({'error':'post not found'},status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = PostEditSerializer(instance=post , data=data , partial=True)
-        
+            return Response(
+                {"error": "post not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = PostEditSerializer(instance=post, data=data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data , status=status.HTTP_200_OK)
-        
-        print(serializer.errors)
-        return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PostSearchAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        query = request.GET.get("q", "")
+        if query:
+            posts = Post.objects.filter(
+                Q(title__icontains=query) | Q(author__username__icontains=query)
+            )
+        else:
+            posts = Post.objects.none()
+
+        serializer = PostSearchSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

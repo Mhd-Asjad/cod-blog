@@ -10,6 +10,7 @@ urlpatterns = [
     path("show-post/<int:pk>/", ShowPostDetailView.as_view(), name="show-post"),
     path("public-profile/<int:user_id>/", ShowUserProfileView.as_view(), name="public-profile"),
     path("author-profile/", AuthorProfileView.as_view(), name='author-profile'),
-    path("delete-post/<int:pk>/", delete_post, name="delete-post")
-    path("edit-post/<int:pk>/" , EditPost.as_view(), name='edit-post')
+    path("delete-post/<int:pk>/", delete_post, name="delete-post"),
+    path("edit-post/<int:pk>/" , EditPost.as_view(), name='edit-post'),
+    path('search/', PostSearchAPIView.as_view(), name='search')
 ]
