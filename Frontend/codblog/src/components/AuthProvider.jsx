@@ -31,22 +31,30 @@ const AuthProvider = ({ children }) => {
             refresh: refresh_token,
           });
 
-          if (response.status === 200) {
+          const newAccess = response.data.aceess;
+          const newRefresh = response.data.refresh || refresh_token;
+
+          const decoded = jwtDecode(newAccess);
+          if (decoded.exp > Date.now() / 1000) {
             dispatch(
               saveLogin({
-                access_token: response.data.access,
-                refresh_token: response.data.refresh || refresh_token,
+                access_token: newAccess,
+                refresh_token: newRefresh || refresh_token,
                 user,
-                is_login,
+                is_login: true,
               })
             );
           } else {
-            throw new Error("Failed to refresh token");
+            throw new Error("Refreshed token is already expired");
           }
         } else {
           dispatch(removeLogin());
         }
       } catch (error) {
+        console.log(
+          "Auth check failed:",
+          error?.response?.data || error.message
+        );
         dispatch(removeLogin());
       } finally {
         setLoading(false);
@@ -54,7 +62,7 @@ const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-  }, [access_token, refresh_token]);
+  }, [access_token, refresh_token, dispatch, api, user]);
 
   if (loading) {
     return (

@@ -52,3 +52,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "profile_image", "posts", 'bio']
 
 
+class PostSearchSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source="author.username", read_only=True)
+    author_first_name = serializers.CharField(source="author.first_name", read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ['id', 'title', 'like', 'created_at', 'author_username', 'author_first_name']

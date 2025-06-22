@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { LogOut, Menu, Plus, Search, User, X } from "lucide-react";
+import { Filter, LogOut, Menu, Plus, Search, User, X } from "lucide-react";
 import * as motion from "motion/react-client";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import GlitchText from "./Glitch";
 import useApi from "./useApi";
 import { removeLogin } from "../store/slice";
+import DynamicSearch from "./DynamicSearch";
 
 const Nav = () => {
   const { is_login, refresh_token } = useSelector((state) => state.auth);
@@ -78,16 +79,8 @@ const Nav = () => {
           </GlitchText>
         </div>
 
-        <div className="hidden sm:block relative w-32 md:w-64">
-          <input
-            type="text"
-            className="w-full px-10 py-2 rounded-full border border-gray-400 dark:border-gray-600 dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white focus:outline-none dark:focus:ring-1 dark:focus:ring-purple-400 font-montserrat tracking-wider"
-            placeholder="Search"
-          />
-          <Search
-            className="absolute top-2.5 left-3 text-gray-500 dark:text-white"
-            size={18}
-          />
+        <div className="hidden sm:block relative w-64 md:w-90 ">
+          <DynamicSearch className="w-full" />
         </div>
 
         <div className="hidden md:flex items-center gap-6">
@@ -185,7 +178,7 @@ const Nav = () => {
           transition={{ duration: 0.2 }}
           className="md:hidden w-full bg-zinc-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700"
         >
-<div className="px-4 py-2">
+          <div className="px-4 py-2">
             <div className="mb-2 relative">
               <input
                 type="text"
@@ -197,10 +190,16 @@ const Nav = () => {
                 size={18}
               />
             </div>
-            
+
             {is_login ? (
               <div className="flex flex-col space-y-2">
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" onClick={() => { navigate(`/view-profile/${user?.id}`); setMobileMenuOpen(false); }}>
+                <div
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                  onClick={() => {
+                    navigate(`/view-profile/${user?.id}`);
+                    setMobileMenuOpen(false);
+                  }}
+                >
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-400 dark:border-gray-600 flex items-center justify-center">
                     {user?.profile_image ? (
                       <img
@@ -212,20 +211,38 @@ const Nav = () => {
                       <User size={16} className="text-black dark:text-white" />
                     )}
                   </div>
-                  <span className="text-black dark:text-white font-montserrat">Profile</span>
+                  <span className="text-black dark:text-white font-montserrat">
+                    Profile
+                  </span>
                 </div>
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" onClick={() => { navigate("/write-posts"); setMobileMenuOpen(false); }}>
+                <div
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                  onClick={() => {
+                    navigate("/write-posts");
+                    setMobileMenuOpen(false);
+                  }}
+                >
                   <Plus size={16} className="text-black dark:text-white" />
-                  <span className="text-black dark:text-white font-montserrat">Add Post</span>
+                  <span className="text-black dark:text-white font-montserrat">
+                    Add Post
+                  </span>
                 </div>
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" onClick={handleLogoutOut}>
+                <div
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                  onClick={handleLogoutOut}
+                >
                   <LogOut size={16} className="text-black dark:text-white" />
-                  <span className="text-black dark:text-white font-montserrat">Logout</span>
+                  <span className="text-black dark:text-white font-montserrat">
+                    Logout
+                  </span>
                 </div>
               </div>
             ) : (
               <button
-                onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}
+                onClick={() => {
+                  navigate("/login");
+                  setMobileMenuOpen(false);
+                }}
                 className="w-full p-2 my-2 cursor-pointer rounded-lg border border-gray-400 bg-zinc-100 font-montserrat font-bold tracking-wide text-black hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:text-black hover:text-gray-700 transition-colors duration-300 ease-in-out"
               >
                 Login
