@@ -9,7 +9,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.JSONField(null=True, blank=True)
     like = models.IntegerField(default=0)
-    dislike = models.IntegerField(default=0)
+    liked_by = models.ManyToManyField(user, related_name="liked_posts", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -25,3 +25,15 @@ class Comment(models.Model):
     def __str__(self):
         return f'{self.post.title} - {self.comment[:11]}.....'
 
+
+class Follow(models.Model):
+    
+    follower = models.ForeignKey(user, related_name="following", on_delete=models.CASCADE) # this field will stores the user who clicked "follow" (the one initiating the action)
+    following = models.ForeignKey(user, related_name="followers", on_delete=models.CASCADE) # Stores the user who is being followed (the one receiving the follow)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+    
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"

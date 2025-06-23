@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 import requests
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -108,12 +109,11 @@ class ListPostView(generics.ListAPIView):
 
 class ShowPostDetailView(APIView):
     permission_classes = [AllowAny]
-    authentication_classes = []
 
     def get(self, request, pk):
         try:
             post = Post.objects.get(pk=pk)
-            serializer = PostSerializer(post)
+            serializer = PostSerializer(post, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response(
@@ -174,14 +174,23 @@ class EditPost(APIView):
 
     def put(self, request, pk):
         data = request.data
-        print(data)
+        content = data.get('content', None)
+        print(content)
+        
+        title = None
+        for block in content.get("blocks", []):
+            if block.get("type") == "header":
+                title = block.get("data", {}).get("text", "").strip()
+                if title:
+                    break
         try:
             post = Post.objects.get(pk=pk)
         except Post.DoesNotExist:
             return Response(
                 {"error": "post not found"}, status=status.HTTP_404_NOT_FOUND
             )
-
+        data['title'] = title
+        print("this is the title", title)
         serializer = PostEditSerializer(instance=post, data=data, partial=True)
 
         if serializer.is_valid():
@@ -206,3 +215,95 @@ class PostSearchAPIView(APIView):
 
         serializer = PostSearchSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PostLikeView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, post_id):
+        try:
+            post = Post.objects.get(id = post_id)
+        except Post.DoesNotExist:
+            return Response({"error" : "Post does not exists"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        if user in post.liked_by.all():
+            post.liked_by.remove(user)
+            post.like = max(0, post.like - 1)
+            post.save()
+            is_liked = False
+            message = "Like removed"
+            return Response({"message": message, "likes": post.like, "is_liked" : is_liked})
+
+        else:
+            post.liked_by.add(user)
+            post.like += 1
+            post.save()
+            is_liked = True
+            message = "Like added"
+            return Response({"message": message, "likes": post.like, "is_liked" : is_liked})
+
+# ----------------------------------------
+
+class FollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer = FollowSerializer(data = request.data, context = {'request' : request})
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'detail' : "Followed Successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UnfollowUserView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        following_id = request.data.get('following')
+        
+        try:
+            following_user = User.objects.get(id = following_id)
+            follow = Follow.objects.get(follower = request.user, following = following_user)
+
+            follow.delete()
+            return Response({'detail' : "Unfollowed Successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Follow.DoesNotExist:
+            return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
+        
+class FollowStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_id):
+        target_user = get_object_or_404(User, id = user_id)
+        is_following = Follow.objects.filter(follower = request.user, following = target_user).exists()
+        
+        return Response({"is_following" : is_following})
+    
+class GetFollowCountView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        user = request.user
+            
+        follower_count = Follow.objects.filter(following=user).count()
+        following_count = Follow.objects.filter(follower=user).count()
+        
+        return Response({
+            "follower_count": follower_count,
+            "following_count": following_count
+        })
+        
+        
+class FollowedPostView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        followed_users = Follow.objects.filter(follower = user).values_list('following', flat=True)
+        posts = Post.objects.filter(author__id__in=followed_users).order_by('-created_at')
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializers.data)
