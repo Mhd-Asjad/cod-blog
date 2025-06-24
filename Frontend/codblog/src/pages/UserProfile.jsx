@@ -27,6 +27,7 @@ import {
   Save,
   X,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -44,16 +45,17 @@ const UserProfile = () => {
   const [displayedPosts, setDisplayedPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [postsToShow, setPostsToShow] = useState(10);
-  const [followCount, setFollowCount] = useState(null)
+  const [followCount, setFollowCount] = useState(null);
 
   const [hasMore, setHasMore] = useState(false);
+  const reduxUser = useSelector((state) => state.auth.user)
 
   const navigate = useNavigate();
   const api = useApi();
 
   useEffect(() => {
     fetchUserProfile();
-    getFollowCount()
+    getFollowCount();
   }, []);
 
   async function fetchUserProfile() {
@@ -86,13 +88,12 @@ const UserProfile = () => {
 
   const getFollowCount = async () => {
     try {
-      const response = await api.get("posts/get-follow-count/")
-      setFollowCount(response.data)
-
-    } catch ( error ) {
-      console.error("failed to fetch follow count")
+      const response = await api.get(`posts/get-follow-count/${reduxUser.id}`);
+      setFollowCount(response.data);
+    } catch (error) {
+      console.error("failed to fetch follow count");
     }
-  }
+  };
 
   useEffect(() => {
     if (user?.posts) {
@@ -227,19 +228,15 @@ const UserProfile = () => {
     navigate(`/post/${postId}`);
   };
 
-
-
   return (
     <div className="h-screen overflow-y-auto bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-     <div className="sticky top-0 z-50">
+      <div className="sticky top-0 z-50">
         <Nav />
       </div>
 
       {/* Hero Section with Cover */}
       <div className="relative">
         <div className="h-110 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-800 dark:via-blue-800 dark:to-indigo-800"></div>
-
-
 
         <div className="absolute -bottom-20 inset-x-0 h-130 flex justify-center px-4">
           <motion.div
@@ -430,7 +427,7 @@ const UserProfile = () => {
                   <div className="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {followCount?.followers_count || 0}
+                      {followCount?.follower_count || 0}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       Followers

@@ -9,7 +9,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.JSONField(null=True, blank=True)
     like = models.IntegerField(default=0)
-    liked_by = models.ManyToManyField(user, related_name="liked_posts", blank=True, null=True)
+    liked_by = models.ManyToManyField(user, related_name="liked_posts", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

@@ -286,8 +286,8 @@ class FollowStatusView(APIView):
 class GetFollowCountView(APIView):
     permission_classes = [AllowAny]
     
-    def get(self, request):
-        user = request.user
+    def get(self, request, user_id):
+        user = User.objects.get(id = user_id)
             
         follower_count = Follow.objects.filter(following=user).count()
         following_count = Follow.objects.filter(follower=user).count()
@@ -303,7 +303,12 @@ class FollowedPostView(APIView):
     
     def get(self, request):
         user = request.user
-        followed_users = Follow.objects.filter(follower = user).values_list('following', flat=True)
-        posts = Post.objects.filter(author__id__in=followed_users).order_by('-created_at')
+        followed_user_ids  = Follow.objects.filter(follower = user).values_list('following', flat=True)
+        posts = Post.objects.filter(author__id__in=followed_user_ids ).order_by('-created_at')
+        
+        paginator = CustomPaginationClass()
+        paninated_posts = paginator.paginate_queryset(posts, request, view=self)
+        
+        
         serializer = PostSerializer(posts, many=True)
-        return Response(serializers.data)
+        return paginator.get_paginated_response(serializer.data)

@@ -17,6 +17,6 @@ urlpatterns = [
     path('follow/', FollowUserView.as_view(), name='follow-user'),
     path('unfollow/', UnfollowUserView.as_view(), name='unfollow-user'),
     path("follow/status/<int:user_id>/", FollowStatusView.as_view(), name="follow-status"),
-    path('get-follow-count/', GetFollowCountView.as_view(), name='follow-count'),
-    path('posts/following/', FollowedPostView.as_view(), name='following-posts')
+    path('get-follow-count/<int:user_id>/', GetFollowCountView.as_view(), name='follow-count'),
+    path('following-posts/', FollowedPostView.as_view(), name='following-posts')
 ]

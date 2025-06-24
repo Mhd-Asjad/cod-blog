@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 const Home = () => {
   const api = useApi();
   const navigate = useNavigate();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const isAuthenticated = useSelector((state) => state.auth.is_login);
   const sortBy = useSelector((state) => state.filter.sortBy);
 
   const [explorePosts, setExplorePosts] = useState([]);
@@ -107,7 +107,7 @@ const Home = () => {
               {post.author.profile_image ? (
                 <img
                   className="w-14 h-14 border-3 border-purple-200 dark:border-purple-600 object-cover rounded-full shadow-lg ring-4 ring-purple-100 dark:ring-purple-900 transition-transform duration-300 group-hover:scale-105"
-                  src={post.author.profile_image}
+                  src={post.author.profile_image.startsWith('http') ? post.author.profile_image : `http://localhost:8000${post.author.profile_image}`}
                   alt="user-profile"
                 />
               ) : (
@@ -115,7 +115,6 @@ const Home = () => {
                   <User size={22} />
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></div>
             </div>
             
             <div className="flex-1">
@@ -251,7 +250,9 @@ const Home = () => {
 
   return (
     <div className="h-screen overflow-y-auto bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+      <div className="sticky top-0 z-50">
       <Nav />
+      </div>
       
       {/* Hero section */}
       <div className="relative overflow-hidden">
@@ -302,7 +303,7 @@ const Home = () => {
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ duration: 0.5 }}
                       >
-                        {followingPosts.length > 0 ? (
+                        {followingPosts?.length > 0 ? (
                           renderPosts(followingPosts)
                         ) : (
                           <EmptyState 
