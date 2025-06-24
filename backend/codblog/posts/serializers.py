@@ -18,7 +18,14 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'title', 'content', 'author', 'created_at', 'updated_at', 'like', 'is_liked'
+            "id",
+            "title",
+            "content",
+            "author",
+            "created_at",
+            "updated_at",
+            "like",
+            "is_liked",
         ]
 
     def get_is_liked(self, obj):
@@ -53,7 +60,7 @@ class HomePostSerializer(serializers.ModelSerializer):
 class SimplePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ["id", "title", "created_at", 'like']
+        fields = ["id", "title", "created_at", "like"]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -85,18 +92,19 @@ class PostSearchSerializer(serializers.ModelSerializer):
 class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
-        fields = ['following']
-        
+        fields = ["following"]
+
     def create(self, validated_data):
-        follower = self.context['request'].user
-        following = validated_data['following']
-        
+        follower = self.context["request"].user
+        following = validated_data["following"]
+
         if follower == following:
             raise serializers.ValidationError("You cannot follow yourself.")
 
-        follow, created = Follow.objects.get_or_create(follower = follower, following = following)
-        
+        follow, created = Follow.objects.get_or_create(
+            follower=follower, following=following
+        )
+
         if not created:
             raise serializers.ValidationError("Already following this user.")
         return follow
-    
