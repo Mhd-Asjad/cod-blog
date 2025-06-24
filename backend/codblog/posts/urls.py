@@ -12,5 +12,11 @@ urlpatterns = [
     path("author-profile/", AuthorProfileView.as_view(), name='author-profile'),
     path("delete-post/<int:pk>/", delete_post, name="delete-post"),
     path("edit-post/<int:pk>/" , EditPost.as_view(), name='edit-post'),
-    path('search/', PostSearchAPIView.as_view(), name='search')
+    path('search/', PostSearchAPIView.as_view(), name='search'),
+    path('post-like/<int:post_id>/', PostLikeView.as_view(), name='post-like'),
+    path('follow/', FollowUserView.as_view(), name='follow-user'),
+    path('unfollow/', UnfollowUserView.as_view(), name='unfollow-user'),
+    path("follow/status/<int:user_id>/", FollowStatusView.as_view(), name="follow-status"),
+    path('get-follow-count/', GetFollowCountView.as_view(), name='follow-count'),
+    path('posts/following/', FollowedPostView.as_view(), name='following-posts')
 ]
