@@ -185,7 +185,9 @@ const ShowPost = () => {
 
   return (
     <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+      <div className="sticky top-0 z-50">
       <Nav />
+      </div>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

@@ -58,7 +58,7 @@ const ShowUserDetail = () => {
 
   const getFollowCount = async () => {
     try {
-      const response = await api.get("posts/get-follow-count/")
+      const response = await api.get(`posts/get-follow-count/${id}/`)
       setFollowCount(response.data)
 
     } catch ( error ) {

@@ -162,7 +162,9 @@ const AddPost = () => {
 
   return (
     <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+      <div className="sticky top-0 z-50">
       <Nav />
+      </div>
       <div className="p-6 dark:text-white font-montserrat">
         <div id="editorjs" className="editor-container" />
 

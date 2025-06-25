@@ -3,7 +3,15 @@ import Nav from "../components/Nav";
 import useApi from "../components/useApi";
 import { HashLoader } from "react-spinners";
 import { motion, AnimatePresence } from "motion/react";
-import { User, Calendar, Eye, Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import {
+  User,
+  Calendar,
+  Eye,
+  Heart,
+  MessageCircle,
+  Share2,
+  Bookmark,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Tab } from "@headlessui/react";
@@ -12,7 +20,7 @@ import { useSelector } from "react-redux";
 const Home = () => {
   const api = useApi();
   const navigate = useNavigate();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const isAuthenticated = useSelector((state) => state.auth.is_login);
   const sortBy = useSelector((state) => state.filter.sortBy);
 
   const [explorePosts, setExplorePosts] = useState([]);
@@ -34,7 +42,9 @@ const Home = () => {
     }
   }, [sortBy]);
 
-  const fetchExplorePosts = async (url = `posts/list-posts/?sort=${sortBy}`) => {
+  const fetchExplorePosts = async (
+    url = `posts/list-posts/?sort=${sortBy}`
+  ) => {
     try {
       setLoading(true);
       const relativeUrl = url.startsWith("http")
@@ -55,7 +65,9 @@ const Home = () => {
     }
   };
 
-  const fetchFollowingPosts = async (url = `posts/following-posts/?sort=${sortBy}`) => {
+  const fetchFollowingPosts = async (
+    url = `posts/following-posts/?sort=${sortBy}`
+  ) => {
     try {
       setLoading(true);
       const relativeUrl = url.startsWith("http")
@@ -98,7 +110,7 @@ const Home = () => {
       >
         {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-        
+
         {/* Main content */}
         <div className="relative p-8">
           {/* Author section */}
@@ -107,7 +119,11 @@ const Home = () => {
               {post.author.profile_image ? (
                 <img
                   className="w-14 h-14 border-3 border-purple-200 dark:border-purple-600 object-cover rounded-full shadow-lg ring-4 ring-purple-100 dark:ring-purple-900 transition-transform duration-300 group-hover:scale-105"
-                  src={post.author.profile_image}
+                  src={
+                    post.author.profile_image.startsWith("http")
+                      ? post.author.profile_image
+                      : `http://localhost:8000${post.author.profile_image}`
+                  }
                   alt="user-profile"
                 />
               ) : (
@@ -115,9 +131,8 @@ const Home = () => {
                   <User size={22} />
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></div>
             </div>
-            
+
             <div className="flex-1">
               <span
                 onClick={(e) => handleUsernameClick(e, post.author.id)}
@@ -178,7 +193,7 @@ const Home = () => {
               {/* <ActionButton icon={MessageCircle} count={post.comments || 0} />
               <ActionButton icon={Eye} count={post.views || 0} /> */}
             </div>
-            
+
             <div className="flex items-center gap-3">
               <ActionButton icon={Bookmark} />
               <ActionButton icon={Share2} />
@@ -196,7 +211,10 @@ const Home = () => {
       onClick={(e) => e.stopPropagation()}
       className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 group/btn"
     >
-      <Icon size={18} className="group-hover/btn:scale-110 transition-transform duration-200" />
+      <Icon
+        size={18}
+        className="group-hover/btn:scale-110 transition-transform duration-200"
+      />
       {count !== undefined && (
         <span className="text-sm font-medium">{count}</span>
       )}
@@ -204,10 +222,10 @@ const Home = () => {
   );
 
   const postVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 60,
-      scale: 0.95
+      scale: 0.95,
     },
     visible: (i) => ({
       opacity: 1,
@@ -230,9 +248,9 @@ const Home = () => {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   if (loading) {
@@ -251,18 +269,19 @@ const Home = () => {
 
   return (
     <div className="h-screen overflow-y-auto bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
-      <Nav />
-      
+      <div className="sticky top-0 z-50">
+        <Nav />
+      </div>
+
       {/* Hero section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 dark:from-purple-900/20 dark:to-blue-900/20" />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="relative px-4 max-w-6xl mx-auto pt-24 pb-12"
         >
-
           <motion.div variants={tabVariants} initial="hidden" animate="visible">
             <Tab.Group>
               <Tab.List className="flex space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-2 shadow-xl border border-white/20 dark:border-gray-700/50 mb-12 max-w-md mx-auto">
@@ -302,10 +321,10 @@ const Home = () => {
                         exit={{ opacity: 0, x: 20 }}
                         transition={{ duration: 0.5 }}
                       >
-                        {followingPosts.length > 0 ? (
+                        {followingPosts?.length > 0 ? (
                           renderPosts(followingPosts)
                         ) : (
-                          <EmptyState 
+                          <EmptyState
                             title="No posts from people you follow"
                             description="Start following creators to see their latest posts here"
                           />
@@ -330,7 +349,7 @@ const Home = () => {
                       {explorePosts.length > 0 ? (
                         renderPosts(explorePosts)
                       ) : (
-                        <EmptyState 
+                        <EmptyState
                           title="No posts to explore"
                           description="Check back later for new content"
                         />
@@ -363,13 +382,15 @@ const EmptyState = ({ title, description }) => (
     <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
       <Eye size={40} className="text-purple-600 dark:text-purple-400" />
     </div>
-    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">{title}</h3>
+    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+      {title}
+    </h3>
     <p className="text-gray-600 dark:text-gray-400">{description}</p>
   </motion.div>
 );
 
 const Pagination = ({ next, prev, page, fetchNext, fetchPrev }) => (
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     className="flex justify-center items-center mt-16 gap-4"
@@ -384,7 +405,7 @@ const Pagination = ({ next, prev, page, fetchNext, fetchPrev }) => (
         ← Previous
       </motion.button>
     )}
-    
+
     {prev && next && (
       <div className="px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 dark:border-gray-700/50">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -392,7 +413,7 @@ const Pagination = ({ next, prev, page, fetchNext, fetchPrev }) => (
         </span>
       </div>
     )}
-    
+
     {next && (
       <motion.button
         whileHover={{ scale: 1.05 }}

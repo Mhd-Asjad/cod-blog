@@ -87,22 +87,27 @@ class ListPostView(generics.ListAPIView):
     pagination_class = CustomPaginationClass
 
     def get_queryset(self):
-        sort_by = self.request.query_params.get('sort', 'newest')
+        sort_by = self.request.query_params.get("sort", "newest")
 
         queryset = Post.objects.all()
 
-        if sort_by == 'newest':
-            queryset = queryset.order_by('-created_at')
-        elif sort_by == 'oldest':
-            queryset = queryset.order_by('created_at')
-        elif sort_by == 'most_liked':
-            queryset = queryset.annotate(like_count=Count('like')).order_by('-like_count', '-created_at')
-            print('most liked' ,queryset)
-        elif sort_by == 'least_liked':
-            queryset = queryset.annotate(like_count=Count('like')).order_by('like_count', 'created_at')
-            print('least liked' ,queryset)
+        if sort_by == "newest":
+            queryset = queryset.order_by("-created_at")
+        elif sort_by == "oldest":
+            queryset = queryset.order_by("created_at")
+        elif sort_by == "most_liked":
+            queryset = queryset.annotate(like_count=Count("like")).order_by(
+                "like_count", "created_at"
+            )
+            print("most liked", queryset)
+        elif sort_by == "least_liked":
+            queryset = queryset.annotate(like_count=Count("like")).order_by(
+                "-like_count", "-created_at"
+            )
+            
+            print("least liked", queryset)
         else:
-            queryset = queryset.order_by('-created_at')
+            queryset = queryset.order_by("-created_at")
 
         return queryset
 
@@ -174,9 +179,9 @@ class EditPost(APIView):
 
     def put(self, request, pk):
         data = request.data
-        content = data.get('content', None)
+        content = data.get("content", None)
         print(content)
-        
+
         title = None
         for block in content.get("blocks", []):
             if block.get("type") == "header":
@@ -189,7 +194,7 @@ class EditPost(APIView):
             return Response(
                 {"error": "post not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        data['title'] = title
+        data["title"] = title
         print("this is the title", title)
         serializer = PostEditSerializer(instance=post, data=data, partial=True)
 
@@ -219,12 +224,14 @@ class PostSearchAPIView(APIView):
 
 class PostLikeView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request, post_id):
         try:
-            post = Post.objects.get(id = post_id)
+            post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
-            return Response({"error" : "Post does not exists"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Post does not exists"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         user = request.user
         if user in post.liked_by.all():
@@ -233,7 +240,9 @@ class PostLikeView(APIView):
             post.save()
             is_liked = False
             message = "Like removed"
-            return Response({"message": message, "likes": post.like, "is_liked" : is_liked})
+            return Response(
+                {"message": message, "likes": post.like, "is_liked": is_liked}
+            )
 
         else:
             post.liked_by.add(user)
@@ -241,69 +250,93 @@ class PostLikeView(APIView):
             post.save()
             is_liked = True
             message = "Like added"
-            return Response({"message": message, "likes": post.like, "is_liked" : is_liked})
+            return Response(
+                {"message": message, "likes": post.like, "is_liked": is_liked}
+            )
+
 
 # ----------------------------------------
 
+
 class FollowUserView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
-        serializer = FollowSerializer(data = request.data, context = {'request' : request})
-        
+        serializer = FollowSerializer(data=request.data, context={"request": request})
+
         if serializer.is_valid():
             serializer.save()
-            return Response({'detail' : "Followed Successfully"}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"detail": "Followed Successfully"}, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UnfollowUserView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
-        following_id = request.data.get('following')
-        
+        following_id = request.data.get("following")
+
         try:
-            following_user = User.objects.get(id = following_id)
-            follow = Follow.objects.get(follower = request.user, following = following_user)
+            following_user = User.objects.get(id=following_id)
+            follow = Follow.objects.get(follower=request.user, following=following_user)
 
             follow.delete()
-            return Response({'detail' : "Unfollowed Successfully"}, status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {"detail": "Unfollowed Successfully"}, status=status.HTTP_204_NO_CONTENT
+            )
         except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
         except Follow.DoesNotExist:
-            return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(
+                {"detail": "You are not following this user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
 class FollowStatusView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, user_id):
-        target_user = get_object_or_404(User, id = user_id)
-        is_following = Follow.objects.filter(follower = request.user, following = target_user).exists()
-        
-        return Response({"is_following" : is_following})
-    
+        target_user = get_object_or_404(User, id=user_id)
+        is_following = Follow.objects.filter(
+            follower=request.user, following=target_user
+        ).exists()
+
+        return Response({"is_following": is_following})
+
+
 class GetFollowCountView(APIView):
     permission_classes = [AllowAny]
-    
-    def get(self, request):
-        user = request.user
-            
+
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+
         follower_count = Follow.objects.filter(following=user).count()
         following_count = Follow.objects.filter(follower=user).count()
-        
-        return Response({
-            "follower_count": follower_count,
-            "following_count": following_count
-        })
-        
-        
+
+        return Response(
+            {"follower_count": follower_count, "following_count": following_count}
+        )
+
+
 class FollowedPostView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         user = request.user
-        followed_users = Follow.objects.filter(follower = user).values_list('following', flat=True)
-        posts = Post.objects.filter(author__id__in=followed_users).order_by('-created_at')
+        followed_user_ids = Follow.objects.filter(follower=user).values_list(
+            "following", flat=True
+        )
+        posts = Post.objects.filter(author__id__in=followed_user_ids).order_by(
+            "-created_at"
+        )
+
+        paginator = CustomPaginationClass()
+        paninated_posts = paginator.paginate_queryset(posts, request, view=self)
+
         serializer = PostSerializer(posts, many=True)
-        return Response(serializers.data)
+        return paginator.get_paginated_response(serializer.data)

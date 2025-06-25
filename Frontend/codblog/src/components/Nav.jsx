@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
-  Filter,
   LogOut,
-  Menu as menu,
+  Menu as LucideMenu,
   Plus,
   Search,
   User,
@@ -208,7 +207,7 @@ const Nav = () => {
             onClick={toggleMobileMenu}
             className="text-black dark:text-white p-1"
           >
-            {mobileMenuOpen ? <X size={24} /> : <menu size={24} />}
+            {mobileMenuOpen ? <X size={24} /> : <LucideMenu size={24} />}
           </button>
         </div>
       </nav>
