@@ -1,4 +1,4 @@
-# Log
+# Log and environment
 .env
 logs
 *.log
@@ -8,18 +8,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Build output
 node_modules
 dist
 dist-ssr
+.next
+out
+.cache
+
+# Local development overrides
 *.local
 
-# Editor directories and files
+# Test coverage
+coverage
+
+# OS system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Editor settings
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.ntv*
