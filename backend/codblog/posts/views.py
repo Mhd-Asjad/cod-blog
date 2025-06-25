@@ -9,11 +9,11 @@ from rest_framework.response import Response
 from django.db.models import Q, Count
 from rest_framework.views import APIView
 from rest_framework import status, generics
-
+from django.shortcuts import get_object_or_404
 from .serializers import *
 from django.contrib.auth import get_user_model
 from rest_framework.pagination import PageNumberPagination
-from .models import Post
+from .models import *
 import logging
 
 User = get_user_model()
@@ -340,3 +340,69 @@ class FollowedPostView(APIView):
 
         serializer = PostSerializer(posts, many=True)
         return paginator.get_paginated_response(serializer.data)
+<<<<<<< feature/post-notification
+
+
+class list_notifications(APIView):
+    def get(self, request, user_id):
+        notifications = Notifications.objects.filter(
+            recipient_id=user_id
+        ).select_related('sender').order_by('-created_at')
+        print('noticount' , notifications.count())
+
+        if not notifications.exists():
+            return Response({'message': 'No notifications found'}, status=status.HTTP_404_NOT_FOUND)
+
+        data = [
+            {
+                'id': n.id,
+                'sender': {
+                    'username': n.sender.username,
+                    'profile_image': request.build_absolute_uri(n.sender.profile_image.url)
+                    if n.sender.profile_image else None
+                },
+                'notification_type': n.notification_type,
+                'post_title': n.post.title if n.post else None,
+                'comment_content': n.comment.comment if n.comment else None,
+                'is_read': n.is_read,
+                'created_at': n.created_at,
+            }
+            for n in notifications
+        ]
+
+        return Response({ 'notification_data' : data , 'count' : notifications.count()}, status=status.HTTP_200_OK)
+class notification_actions(APIView):
+    def post(self , request , notification_id):
+        try:
+            data = request.data
+            action = data.get('action')
+            
+            notification = get_object_or_404(
+                request.user.notifications , 
+                id = notification_id
+            )
+            
+            if action == 'mark_read':
+                notification.is_read = True
+                notification.save()
+                return Response({'message' : 'marked as read'},status=status.HTTP_200_OK)
+                
+            if action == 'mark_unread':
+                notification.is_read = False
+                notification.save()
+                return Response({'message' : 'marked as unread'},status=status.HTTP_200_OK)
+                
+            elif action == 'delete' :
+                notification.delete()
+                return Response({'message' : 'notification deleted'},status=status.HTTP_200_OK)
+            
+            else :
+                return Response({'message' : 'notification deleted'},status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e :
+            print( 'error on not actions' ,str(e))
+            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+=======
+>>>>>>> main
