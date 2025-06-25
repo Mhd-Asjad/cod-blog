@@ -24,10 +24,10 @@ const SortFilter = () => {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition focus:outline-none"
+        className="inline-flex items-center cursor-pointer px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition focus:outline-none"
         title="Sort Filter"
       >
-        <Filter size={18} />
+        <Filter size={18}  />
         <ChevronDown className="ml-1 h-4 w-4" />
       </button>
 
@@ -37,8 +37,8 @@ const SortFilter = () => {
         className="relative z-50"
       >
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4 sm:p-6">
-          <Dialog.Panel className="w-full max-w-xs sm:max-w-sm rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
+        <div className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 ">
+          <Dialog.Panel className="w-full max-w-xs sm:max-w-sm rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg ">
             <Dialog.Title className="text-lg font-bold text-gray-800 dark:text-white mb-4">
               Select Sort Option
             </Dialog.Title>
@@ -50,7 +50,7 @@ const SortFilter = () => {
                     dispatch(sliceSortBy(option.value));
                     setIsOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm rounded-md transition hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  className={`w-full text-left px-4 py-2 text-sm rounded-md transition hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-700 ${
                     sortBy === option.value
                       ? "font-semibold text-purple-600 dark:text-purple-400"
                       : "text-gray-800 dark:text-white"

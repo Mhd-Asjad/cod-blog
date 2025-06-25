@@ -11,6 +11,7 @@ import AuthProvider from "./components/AuthProvider";
 import { ToastContainer } from "react-toastify";
 import UserProfile from "./pages/UserProfile";
 import EditPost from "./pages/EditPost";
+import ShowNotifications from "./pages/ShowNotifications";
 
 const App = () => {
   return (
@@ -61,7 +62,14 @@ const App = () => {
                 </PrivateRoute>
               }
             />
-            
+            <Route
+              path="/notifications"
+              element={
+                <PrivateRoute>
+                  <ShowNotifications/>
+                </PrivateRoute>
+              }
+            />
           </Routes>
           <ToastContainer position="top-center" />
 

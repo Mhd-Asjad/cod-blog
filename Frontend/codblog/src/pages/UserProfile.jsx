@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useApi from "../components/useApi";
 import { toast } from "react-toastify";
 import { HashLoader } from "react-spinners";
+import { motion } from "motion/react";
 import {
   User,
   Calendar,
@@ -20,7 +21,13 @@ import {
   Search,
   ChevronDown,
   Pen,
+  FileText,
+  Share2,
+  Settings,
+  Save,
+  X,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -38,19 +45,24 @@ const UserProfile = () => {
   const [displayedPosts, setDisplayedPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [postsToShow, setPostsToShow] = useState(10);
+  const [followCount, setFollowCount] = useState(null);
+
   const [hasMore, setHasMore] = useState(false);
+  const reduxUser = useSelector((state) => state.auth.user)
 
   const navigate = useNavigate();
   const api = useApi();
 
   useEffect(() => {
     fetchUserProfile();
+    getFollowCount();
   }, []);
 
   async function fetchUserProfile() {
     try {
       const response = await api.get("posts/author-profile/");
       if (response.status === 200) {
+        console.log(JSON.stringify(response.data));
         setUser(response.data);
         setFormData({
           username: response.data.username,
@@ -73,6 +85,15 @@ const UserProfile = () => {
       setLoading(false);
     }
   }
+
+  const getFollowCount = async () => {
+    try {
+      const response = await api.get(`posts/get-follow-count/${reduxUser.id}`);
+      setFollowCount(response.data);
+    } catch (error) {
+      console.error("failed to fetch follow count");
+    }
+  };
 
   useEffect(() => {
     if (user?.posts) {
@@ -108,7 +129,7 @@ const UserProfile = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
         const response = await api.delete(`/posts/delete-post/${postId}/`);
-        if (response.status === 404) {
+        if (response.status === 204 || response.status === 200) {
           const updatedPosts = user.posts.filter((p) => p.id !== postId);
           setUser((prevUser) => ({
             ...prevUser,
@@ -117,8 +138,12 @@ const UserProfile = () => {
           setFilteredPosts(
             updatedPosts.filter(
               (post) =>
-                post.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                post.content.toLowerCase().includes(searchText.toLowerCase())
+                (post.title || "")
+                  .toLowerCase()
+                  .includes(searchText.toLowerCase()) ||
+                (post.content || "")
+                  .toLowerCase()
+                  .includes(searchText.toLowerCase())
             )
           );
           setDisplayedPosts((prev) => prev.filter((p) => p.id !== postId));
@@ -199,331 +224,352 @@ const UserProfile = () => {
     navigate("/write-posts");
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <HashLoader color="#8a2be2" size={60} />
-        <p className="mt-4 text-gray-600 dark:text-gray-300 font-medium">
-          Loading profile...
-        </p>
-      </div>
-    );
-  }
+  const handlePostClick = (postId) => {
+    navigate(`/post/${postId}`);
+  };
 
   return (
-    <div className="h-screen overflow-auto bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <Nav />
-      <div className="max-w-4xl mx-auto px-4 py-6 pt-20">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-          <div className="h-48 bg-gradient-to-r from-purple-500 to-indigo-600 relative">
-            <div className="absolute -bottom-16 left-8">
-              <div className="relative group">
-                {isEditing ? (
-                  <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    {previewImage ? (
-                      <img
-                        src={previewImage}
-                        alt="Profile Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : user?.profile_image ? (
-                      <img
-                        src={`http://localhost:8000${user.profile_image}`}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User
-                        size={48}
-                        className="text-gray-400 dark:text-gray-500"
-                      />
-                    )}
-                    <button
-                      onClick={triggerFileInput}
-                      className="absolute inset-0 bg-black/50 rounded-full bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Upload size={24} className="text-white" />
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    {user?.profile_image ? (
-                      <img
-                        src={`http://localhost:8000${user.profile_image}`}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User
-                        size={48}
-                        className="text-gray-400 dark:text-gray-500"
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+    <div className="h-screen overflow-y-auto bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="sticky top-0 z-50">
+        <Nav />
+      </div>
 
-          <div className="pt-20 pb-8 px-8">
+      {/* Hero Section with Cover */}
+      <div className="relative">
+        <div className="h-110 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 dark:from-purple-800 dark:via-blue-800 dark:to-indigo-800"></div>
+
+        <div className="absolute -bottom-20 inset-x-0 h-130 flex justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-4xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 p-8"
+          >
             {isEditing ? (
-              <form onSubmit={handleProfileUpdate} className="space-y-6">
-                <div className="space-y-4">
+              <motion.form
+                onSubmit={handleProfileUpdate}
+                className="space-y-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Profile Image Edit */}
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative group mb-4">
+                    <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-700 overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center shadow-xl">
+                      {previewImage ? (
+                        <img
+                          src={previewImage}
+                          alt="Profile Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : user?.profile_image ? (
+                        <img
+                          src={`http://localhost:8000${user.profile_image}`}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
+                          <User size={48} className="text-white" />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={triggerFileInput}
+                        className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Upload size={24} className="text-white" />
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Click on image to change
+                  </p>
+                </div>
+
+                {/* Form Fields */}
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label
-                      htmlFor="username"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Username
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">
-                        <AtSign size={18} />
-                      </span>
+                      <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
-                        id="username"
                         type="text"
                         value={formData.username}
                         onChange={(e) =>
                           setFormData({ ...formData, username: e.target.value })
                         }
-                        placeholder="Username"
-                        className="pl-10 w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="pl-10 w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Email
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">
-                        <Mail size={18} />
-                      </span>
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
-                        id="email"
                         type="email"
                         value={formData.email}
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        placeholder="Email"
-                        className="pl-10 w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="pl-10 w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
                         required
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <label
-                      htmlFor="bio"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                      Bio
-                    </label>
-                    <textarea
-                      id="bio"
-                      value={formData.bio}
-                      onChange={(e) =>
-                        setFormData({ ...formData, bio: e.target.value })
-                      }
-                      placeholder="Tell us about yourself"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      rows={3}
-                    />
-                  </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <button
-                    type="submit"
-                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                  >
-                    Save Changes
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={formData.bio}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bio: e.target.value })
+                    }
+                    placeholder="Tell us about yourself..."
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm"
+                    rows={4}
+                  />
+                </div>
 
-                  <button
+                <div className="flex gap-4 justify-center">
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center gap-2"
+                  >
+                    <Save size={16} />
+                    Save Changes
+                  </motion.button>
+                  <motion.button
                     type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       setIsEditing(false);
                       setPreviewImage(null);
                     }}
-                    className="px-6 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors duration-300"
+                    className="px-8 py-3 bg-gray-200 dark:bg-gray-700/50 hover:bg-white/70 dark:hover:bg-gray-700/70 text-gray-800 dark:text-gray-200 font-semibold rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200 flex items-center gap-2"
                   >
+                    <X size={16} />
                     Cancel
-                  </button>
+                  </motion.button>
                 </div>
-              </form>
+              </motion.form>
             ) : (
-              <div>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {user?.username}
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400 flex items-center mt-1">
-                      <Mail size={16} className="mr-2" />
-                      {user?.email}
+              <div className="flex flex-col items-center">
+                <div className="relative mb-6">
+                  {user?.profile_image ? (
+                    <img
+                      src={`http://localhost:8000${user.profile_image}`}
+                      alt={user.username}
+                      className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-xl"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-700 shadow-xl">
+                      <User size={48} className="text-white" />
+                    </div>
+                  )}
+                </div>
+
+                {/* User Info */}
+                <div className="text-center mb-6">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    {user?.username}
+                  </h1>
+
+                  {user?.bio ? (
+                    <p className="text-gray-600 dark:text-gray-300 text-lg max-w-md mx-auto leading-relaxed mb-4">
+                      {user.bio}
                     </p>
-                  </div>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 italic mb-4">
+                      No bio added yet. Edit your profile to add one!
+                    </p>
+                  )}
 
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-300"
-                  >
-                    <Edit2 size={16} />
-                    Edit Profile
-                  </button>
+                  {user?.email && (
+                    <div className="flex items-center justify-center text-gray-500 dark:text-gray-400">
+                      <Mail size={16} className="mr-2" />
+                      <span className="text-sm">{user.email}</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="mt-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                    Bio
-                  </h3>
-                  <p className="text-gray-800 dark:text-gray-200">
-                    {user?.bio ||
-                      "No bio added yet. Edit your profile to add one!"}
-                  </p>
-                </div>
-
-                <div className="mt-8 flex gap-6">
+                {/* Stats */}
+                <div className="flex items-center space-x-8 mb-6">
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
                       {user?.posts?.length || 0}
-                    </span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       Posts
-                    </span>
+                    </div>
                   </div>
+                  <div className="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                      {user?.followers_count || 0}
-                    </span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {followCount?.follower_count || 0}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       Followers
-                    </span>
+                    </div>
                   </div>
+                  <div className="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                      {user?.following_count || 0}
-                    </span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {followCount?.following_count || 0}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       Following
-                    </span>
+                    </div>
                   </div>
                 </div>
+
+                {/* Edit Profile Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsEditing(true)}
+                  className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center gap-2"
+                >
+                  <Edit2 size={16} />
+                  Edit Profile
+                </motion.button>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
+      </div>
 
-        <div className="mt-8">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Your Posts
-            </h2>
+      {/* Posts Section */}
+      <div className="pt-32 pb-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            {/* Posts Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400 mr-3" />
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Your Posts
+                </h2>
+              </div>
 
-            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-              <div className="relative w-full md:w-64">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCreatePost}
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 flex items-center gap-2"
+              >
+                <Plus size={18} />
+                Create Post
+              </motion.button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative mb-8">
+              <div className="relative max-w-md mx-auto">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   value={searchText}
                   onChange={handleSearchChange}
                   placeholder="Search your posts..."
-                  className="w-full px-10 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-gray-800 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <Search
-                  className="absolute top-2.5 left-3 text-gray-500 dark:text-gray-400"
-                  size={18}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
-
-              <button
-                onClick={handleCreatePost}
-                className="px-4 py-2 flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-300 whitespace-nowrap"
-              >
-                <Plus size={18} />
-                Create Post
-              </button>
             </div>
-          </div>
 
-          {filteredPosts.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center">
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="bg-gray-100 dark:bg-gray-700 p-6 rounded-full mb-4">
+            {/* Posts Content */}
+            {filteredPosts.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                   {searchText ? (
-                    <Search
-                      size={32}
-                      className="text-gray-400 dark:text-gray-500"
-                    />
+                    <Search className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <Edit2
-                      size={32}
-                      className="text-gray-400 dark:text-gray-500"
-                    />
+                    <FileText className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   {searchText ? "No posts found" : "No posts yet"}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm">
+                <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
                   {searchText
                     ? `No posts match your search for "${searchText}". Try a different search term.`
                     : "Share your thoughts with the world. Create your first post now!"}
                 </p>
-                {!searchText && (
-                  <button
+                {!searchText ? (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleCreatePost}
-                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-300"
+                    className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
                   >
                     Create Your First Post
-                  </button>
-                )}
-                {searchText && (
-                  <button
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSearchText("")}
-                    className="px-6 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors duration-300"
+                    className="px-8 py-3 bg-white/70 dark:bg-gray-800/70 hover:bg-white/90 dark:hover:bg-gray-800/90 text-gray-800 dark:text-gray-200 font-semibold rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200"
                   >
                     Clear Search
-                  </button>
+                  </motion.button>
                 )}
               </div>
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-6">
-                {displayedPosts.map((post) => (
-                  <div
+            ) : (
+              <div className="space-y-6">
+                {displayedPosts.map((post, index) => (
+                  <motion.div
                     key={post.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="group bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/20 overflow-hidden hover:shadow-xl hover:bg-white/90 dark:hover:bg-gray-800/90 transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <div className="p-6">
-                      <div className="flex justify-between items-start">
+                      <div className="flex items-start justify-between mb-4">
                         <div
-                          onClick={() => navigate(`/post/${post.id}`)}
-                          className="cursor-pointer flex-1"
+                          className="flex-1 cursor-pointer"
+                          onClick={() => handlePostClick(post.id)}
                         >
-                          <h3 className="text-xl font-bold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200">
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                             {post.title}
                           </h3>
 
-                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                          {post.content && (
+                            <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3">
+                              {post.content.substring(0, 150)}...
+                            </p>
+                          )}
+
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
                             <div className="flex items-center">
                               <Calendar size={14} className="mr-1" />
-                              {new Date(post.created_at).toLocaleString(
+                              {new Date(post.created_at).toLocaleDateString(
                                 "en-US",
                                 {
                                   year: "numeric",
@@ -542,35 +588,49 @@ const UserProfile = () => {
                                 }
                               )}
                             </div>
-                          </div>
 
-                          {post.content && (
-                            <p className="mt-3 text-gray-700 dark:text-gray-300 line-clamp-2">
-                              {post.content}
-                            </p>
-                          )}
+                            {post.like !== undefined && (
+                              <div className="flex items-center">
+                                <Heart size={14} className="mr-1" />
+                                {post.like}
+                              </div>
+                            )}
+
+                            {post.comments_count !== undefined && (
+                              <div className="flex items-center">
+                                <MessageCircle size={14} className="mr-1" />
+                                {post.comments_count}
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        <button
-                          onClick={() => navigate(`/edit-post/${post.id}`)}
-                          className="ml-4 p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
-                          title="Delete post"
-                        >
-                          <Pen size={20} />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePost(post.id)}
-                          className="ml-4 p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
-                          title="Delete post"
-                        >
-                          <Trash size={20} />
-                        </button>
+                        <div className="flex items-center gap-2 ml-4">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => navigate(`/edit-post/${post.id}`)}
+                            className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all duration-200"
+                            title="Edit post"
+                          >
+                            <Pen size={18} />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleDeletePost(post.id)}
+                            className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all duration-200"
+                            title="Delete post"
+                          >
+                            <Trash size={18} />
+                          </motion.button>
+                        </div>
                       </div>
 
                       {post.image && (
                         <div
-                          className="mt-4 h-48 rounded-lg overflow-hidden cursor-pointer"
-                          onClick={() => navigate(`/post/${post.id}`)}
+                          className="mt-4 h-48 rounded-xl overflow-hidden cursor-pointer"
+                          onClick={() => handlePostClick(post.id)}
                         >
                           <img
                             src={`http://localhost:8000${post.image}`}
@@ -580,47 +640,45 @@ const UserProfile = () => {
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
                         <div className="flex gap-4">
                           <div className="flex items-center text-gray-600 dark:text-gray-400">
                             <Heart size={16} className="mr-1" />
-                            <span>{post.likes_count || 0}</span>
+                            <span>{post.like || 0}</span>
                           </div>
                           <div className="flex items-center text-gray-600 dark:text-gray-400">
                             <MessageCircle size={16} className="mr-1" />
                             <span>{post.comments_count || 0}</span>
                           </div>
-                          <div className="flex items-center text-gray-600 dark:text-gray-400">
-                            <Eye size={16} className="mr-1" />
-                            <span>{post.views_count || 0}</span>
-                          </div>
                         </div>
 
                         <button
-                          onClick={() => navigate(`/post/${post.id}`)}
-                          className="px-3 py-1 text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                          onClick={() => handlePostClick(post.id)}
+                          className="px-4 py-2 text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all duration-200"
                         >
                           View Details →
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
 
-              {hasMore && (
-                <div className="mt-8 flex justify-center">
-                  <button
-                    onClick={handleShowMore}
-                    className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-purple-600 dark:text-purple-400 font-medium rounded-lg shadow-md transition-colors duration-300"
-                  >
-                    Show More
-                    <ChevronDown size={18} />
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+                {hasMore && (
+                  <div className="flex justify-center mt-8">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleShowMore}
+                      className="flex items-center gap-2 px-8 py-3 bg-white/70 dark:bg-gray-800/70 hover:bg-white/90 dark:hover:bg-gray-800/90 text-gray-800 dark:text-gray-200 font-semibold rounded-xl shadow-lg backdrop-blur-sm transition-all duration-200"
+                    >
+                      <ChevronDown size={18} />
+                      Show More Posts
+                    </motion.button>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
         </div>
       </div>
     </div>

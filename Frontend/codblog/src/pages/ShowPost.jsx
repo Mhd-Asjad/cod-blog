@@ -3,8 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import useApi from "../components/useApi";
 import { HashLoader } from "react-spinners";
 import { motion } from "motion/react";
-import { Calendar, User } from "lucide-react";
+import { Calendar, Heart, HeartOff, User } from "lucide-react";
 import Nav from "../components/Nav";
+import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+import { toast } from "react-toastify";
 
 const renderBlock = (block) => {
   switch (block.type) {
@@ -104,27 +107,57 @@ const ShowPost = () => {
   const api = useApi();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [likeLoading, setLikeLoading] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await api.get(`posts/show-post/${id}/`);
         if (response.status === 200) {
+          console.log(JSON.stringify(response.data))
           setPost(response.data);
-          console.log(`Fetched post data: ${JSON.stringify(response.data)}`);
+          setIsLiked(response.data.is_liked);
+          setLikes(response.data.like);
+
         }
       } catch (error) {
-        console.error(`Error while fetching the post: ${error}`);
         setError(error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchPost();
-  }, [id]);
+  }, [id, api]);
+
+  const handleLikeToggle = async () => {
+    const optimisticLiked = !isLiked;
+    const optimisticLikes = isLiked ? likes - 1 : likes + 1;
+
+    setIsLiked(optimisticLiked);
+    setLikes(optimisticLikes);
+    try {
+      const response = await api.post(`posts/post-like/${id}/`);
+
+      if (response.status === 200 && response.data) {
+        setIsLiked(response.data.is_liked);
+        setLikes(response.data.likes);
+      }
+    } catch (error) {
+      setIsLiked(isLiked);
+      setLikes(likes);
+
+      if (error.response && error?.response?.status === 401) {
+        toast.warning("You need to be logged in to like a post.");
+      } else {
+        toast.error("An error occurred while processing your request.");
+        console.error("Like toggle error:", error);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -152,7 +185,9 @@ const ShowPost = () => {
 
   return (
     <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+      <div className="sticky top-0 z-50">
       <Nav />
+      </div>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -160,35 +195,60 @@ const ShowPost = () => {
           transition={{ duration: 0.5 }}
           className="bg-white dark:bg-gray-700 rounded-xl shadow-lg p-8"
         >
-          <div className="mb-8">
-            <div className="flex items-center gap-4 mb-4">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
               {post.author.profile_image ? (
                 <img
-                  className="w-12 h-12 border-2 border-purple-300 dark:border-purple-500 object-cover rounded-full shadow-sm"
-                  src={`http://localhost:8000${post.author.profile_image}`}
-                  alt="user-profile"
+                  src={post.author.profile_image}
+                  alt="User"
+                  className="w-12 h-12 rounded-full border-2 border-purple-500 object-cover shadow"
                 />
               ) : (
-                <div className="flex items-center justify-center w-12 h-12 bg-purple-100 dark:bg-purple-600 text-purple-700 dark:text-white border rounded-full shadow-sm">
+                <div className="w-12 h-12 bg-purple-200 dark:bg-purple-700 rounded-full flex items-center justify-center text-purple-800 dark:text-white">
                   <User size={20} />
                 </div>
               )}
+
               <div>
-                <span
+                <p
                   onClick={() => navigate(`/user/${post.author.id}`)}
-                  className="font-bold cursor-pointer text-gray-800 dark:text-white block hover:underline"
+                  className="text-lg font-semibold cursor-pointer text-gray-800 dark:text-white hover:underline"
                 >
                   {post.author.username}
-                </span>
+                </p>
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <Calendar size={16} className="mr-2" />
-                  {new Date(post.created_at).toLocaleString("en-US", {
+                  <Calendar size={16} className="mr-1" />
+                  {new Date(post.created_at).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </div>
               </div>
+            </div>
+
+            <div
+              className="flex flex-col items-center cursor-pointer transition-transform ease-in-out"
+              onClick={handleLikeToggle}
+            >
+              <motion.div
+                whileTap={{ scale: 1.2 }}
+                className="flex flex-col items-center"
+              >
+                {isLiked ? (
+                  <motion.div
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <HeartSolid className="w-7 h-7 text-purple-600" />
+                  </motion.div>
+                ) : (
+                  <HeartOutline className="w-7 h-7 text-gray-400" />
+                )}
+                <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">
+                  {likes} {likes === 1 ? "Like" : "Likes"}
+                </p>
+              </motion.div>
             </div>
           </div>
 
