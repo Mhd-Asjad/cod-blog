@@ -340,6 +340,7 @@ class FollowedPostView(APIView):
 
         serializer = PostSerializer(posts, many=True)
         return paginator.get_paginated_response(serializer.data)
+<<<<<<< feature/post-notification
 
 
 class list_notifications(APIView):
@@ -403,3 +404,5 @@ class notification_actions(APIView):
             return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
+=======
+>>>>>>> main

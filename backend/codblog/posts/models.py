@@ -17,12 +17,13 @@ class Post(models.Model):
     def __str__(self):
         return f"{self.author.username} - {self.title}"
 
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(user, on_delete=models.CASCADE)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"{self.post.title} - {self.comment[:11]}....."
 
@@ -55,6 +56,3 @@ class Notifications(models.Model):
     def __str__(self):
         notification = f'notification for {self.post.title}' if self.notification_type == 'like' and self.post else 'notification' 
         return f"{self.sender.username} {self.notification_type} {notification}"
-    
-    
-    

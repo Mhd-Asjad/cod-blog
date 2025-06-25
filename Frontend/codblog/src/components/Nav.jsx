@@ -6,10 +6,16 @@ import {
   Search,
   User,
   X,
+<<<<<<< feature/post-notification
   Bell
 } from "lucide-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
+=======
+} from "lucide-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import * as motion from "motion/react-client";
+>>>>>>> main
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import GlitchText from "./Glitch";
@@ -153,6 +159,7 @@ const Nav = () => {
                 />
               </button>
 
+<<<<<<< feature/post-notification
               <button
               
                 onClick={() => navigateTo("/notifications")}
@@ -175,6 +182,13 @@ const Nav = () => {
                   {user.profile_image ? (
                     <img
                       src={`${BASE_URL}${user.profile_image}`}
+=======
+              <Menu as="div" className="relative inline-block text-left">
+                <MenuButton className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition overflow-hidden">
+                  {user?.profile_image ? (
+                    <img
+                      src={`http://localhost:8000${user.profile_image}`}
+>>>>>>> main
                       alt="Profile"
                       className="w-full h-full object-cover rounded-full"
                     />
@@ -186,12 +200,20 @@ const Nav = () => {
                   )}
                 </MenuButton>
 
+<<<<<<< feature/post-notification
                 <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-gray-800 shadow-lg ring- масштаб-1 ring-black/5 focus:outline-none z-50">
+=======
+                <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 focus:outline-none z-50">
+>>>>>>> main
                   <div className="px-1 py-1">
                     <MenuItem>
                       {({ active }) => (
                         <button
+<<<<<<< feature/post-notification
                           onClick={() => navigateTo(`/view-profile/${user.id}`)}
+=======
+                          onClick={() => navigate(`/view-profile/${user?.id}`)}
+>>>>>>> main
                           className={`${
                             active
                               ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"
@@ -206,7 +228,11 @@ const Nav = () => {
                     <MenuItem>
                       {({ active }) => (
                         <button
+<<<<<<< feature/post-notification
                           onClick={handleLogout}
+=======
+                          onClick={handleLogoutOut}
+>>>>>>> main
                           className={`${
                             active
                               ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"

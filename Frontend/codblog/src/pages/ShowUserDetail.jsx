@@ -3,7 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import useApi from "../components/useApi";
 import { HashLoader } from "react-spinners";
 import { motion } from "motion/react";
+<<<<<<< feature/post-notification
 import { User, Calendar, Mail, Users, FileText, Heart, MessageCircle , ArrowLeft, Clock,  } from "lucide-react";
+=======
+import { User, Calendar, Mail, MapPin, Users, FileText, Heart, MessageCircle, Share2, ArrowLeft, Clock, Pen } from "lucide-react";
+>>>>>>> main
 import Nav from "../components/Nav";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
