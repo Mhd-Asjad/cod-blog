@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Filter, LogOut, Menu, Plus, Search, User, X } from "lucide-react";
+import {
+  LogOut,
+  Menu as LucideMenu,
+  Plus,
+  Search,
+  User,
+  X,
+} from "lucide-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import * as motion from "motion/react-client";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -113,23 +121,57 @@ const Nav = () => {
                 />
               </button>
 
-              <button
-                onClick={() => navigate(`/view-profile/${user?.id}`)}
-                className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition overflow-hidden"
-              >
-                {user?.profile_image ? (
-                  <img
-                    src={`http://localhost:8000${user.profile_image}`}
-                    alt="Profile"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <User
-                    className="text-black dark:text-white group-hover:text-gray-500"
-                    size={18}
-                  />
-                )}
-              </button>
+              <Menu as="div" className="relative inline-block text-left">
+                <MenuButton className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition overflow-hidden">
+                  {user?.profile_image ? (
+                    <img
+                      src={`http://localhost:8000${user.profile_image}`}
+                      alt="Profile"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <User
+                      className="text-black dark:text-white group-hover:text-gray-500"
+                      size={18}
+                    />
+                  )}
+                </MenuButton>
+
+                <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 focus:outline-none z-50">
+                  <div className="px-1 py-1">
+                    <MenuItem>
+                      {({ active }) => (
+                        <button
+                          onClick={() => navigate(`/view-profile/${user?.id}`)}
+                          className={`${
+                            active
+                              ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"
+                              : "text-gray-900 dark:text-gray-200"
+                          } group flex w-full items-center rounded-md px-3 py-2 text-sm`}
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </button>
+                      )}
+                    </MenuItem>
+                    <MenuItem>
+                      {({ active }) => (
+                        <button
+                          onClick={handleLogoutOut}
+                          className={`${
+                            active
+                              ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"
+                              : "text-gray-900 dark:text-gray-200"
+                          } group flex w-full items-center rounded-md px-3 py-2 text-sm`}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Logout
+                        </button>
+                      )}
+                    </MenuItem>
+                  </div>
+                </MenuItems>
+              </Menu>
             </div>
           ) : (
             <div>
@@ -165,7 +207,7 @@ const Nav = () => {
             onClick={toggleMobileMenu}
             className="text-black dark:text-white p-1"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={24} /> : <LucideMenu size={24} />}
           </button>
         </div>
       </nav>
