@@ -8,7 +8,6 @@ import Quote from '@editorjs/quote';
 import Embed from "@editorjs/embed";
 import Nav from '../components/Nav';
 import useApi from '../components/useApi';
-import { HashLoader } from "react-spinners";
 
 function EditPost() {
     const {id} = useParams();

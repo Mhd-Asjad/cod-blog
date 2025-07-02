@@ -29,4 +29,7 @@ urlpatterns = [
         name="follow-count",
     ),
     path("following-posts/", FollowedPostView.as_view(), name="following-posts"),
+    path('list-notifications/<int:user_id>/',list_notifications.as_view() , name='list-notifications'),
+    path('notification-actions/<int:notification_id>/',notification_actions.as_view() , name='notification-actions')
+
 ]
