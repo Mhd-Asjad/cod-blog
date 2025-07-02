@@ -213,7 +213,7 @@ class PostSearchAPIView(APIView):
         query = request.GET.get("q", "")
         if query:
             posts = Post.objects.filter(
-                Q(title__icontains=query) | Q(author__username__icontains=query)
+                Q(title_icontains=query) | Q(authorusername_icontains=query)
             )
         else:
             posts = Post.objects.none()
@@ -331,7 +331,7 @@ class FollowedPostView(APIView):
         followed_user_ids = Follow.objects.filter(follower=user).values_list(
             "following", flat=True
         )
-        posts = Post.objects.filter(author__id__in=followed_user_ids).order_by(
+        posts = Post.objects.filter(author_id_in=followed_user_ids).order_by(
             "-created_at"
         )
 
@@ -340,7 +340,6 @@ class FollowedPostView(APIView):
 
         serializer = PostSerializer(posts, many=True)
         return paginator.get_paginated_response(serializer.data)
-<<<<<<< feature/post-notification
 
 
 class list_notifications(APIView):
@@ -402,7 +401,3 @@ class notification_actions(APIView):
         except Exception as e :
             print( 'error on not actions' ,str(e))
             return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        
-=======
->>>>>>> main
