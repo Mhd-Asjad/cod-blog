@@ -7,7 +7,7 @@ const initialState = {
 const filterSlice = createSlice({
     name : 'filter',
     initialState,
-    reducers : {
+    reducers : {    
         setSortBy : (state, action) => {
             state.sortBy = action.payload;
         }

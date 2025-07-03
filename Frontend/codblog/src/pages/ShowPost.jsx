@@ -184,7 +184,7 @@ const ShowPost = () => {
   }
 
   return (
-    <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+    <div className="min-h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
       <div className="sticky top-0 z-50">
       <Nav />
       </div>

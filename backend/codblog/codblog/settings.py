@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "posts",
     "accounts",
+    "channels",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
@@ -107,6 +108,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "codblog.wsgi.application"
 
+ASGI_APPLICATION = 'codblog.asgi.application'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
@@ -122,7 +135,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DATABASE_NAME"),
         "USER": os.getenv("DATABASE_USER"),
-        "PASSWORD": os.getenv('DATABASE_PASSWORD'),
+        "PASSWORD": os.getenv('DATABASE_PASSWORD','postgres'),
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }

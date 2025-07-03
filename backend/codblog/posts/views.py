@@ -213,14 +213,13 @@ class PostSearchAPIView(APIView):
         query = request.GET.get("q", "")
         if query:
             posts = Post.objects.filter(
-                Q(title_icontains=query) | Q(authorusername_icontains=query)
+                Q(title__icontains=query) | Q(author__username__icontains=query)
             )
         else:
             posts = Post.objects.none()
 
         serializer = PostSearchSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class PostLikeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -331,7 +330,7 @@ class FollowedPostView(APIView):
         followed_user_ids = Follow.objects.filter(follower=user).values_list(
             "following", flat=True
         )
-        posts = Post.objects.filter(author_id_in=followed_user_ids).order_by(
+        posts = Post.objects.filter(author_id__in=followed_user_ids).order_by(
             "-created_at"
         )
 
