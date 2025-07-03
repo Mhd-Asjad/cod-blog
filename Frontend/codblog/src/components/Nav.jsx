@@ -6,18 +6,13 @@ import {
   Search,
   User,
   X,
-<<<<<<< feature/post-notification
   Bell
 } from "lucide-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
-=======
-} from "lucide-react";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import * as motion from "motion/react-client";
->>>>>>> main
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
 import GlitchText from "./Glitch";
 import useApi from "./useApi";
 import { removeLogin } from "../store/slice";
@@ -28,13 +23,13 @@ const BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
 const Nav = () => {
   const { is_login, refresh_token } = useSelector((state) => state.auth);
   const reduxUser = useSelector((state) => state.auth.user);
-  
   const api = useApi();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationCount , setNotificationCount ] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem("theme");
     return saved
@@ -73,19 +68,17 @@ const Nav = () => {
     }
   }, [api, is_login]);
 
-
   useEffect(() => {
-    const fetchNotificationCount = async() => {
+    const fetchNotificationCount = async () => {
       try {
         const res = await api.get(`posts/list-notifications/${reduxUser.id}`);
-        setNotificationCount(res.data.count)
-        
-      }catch(error) {
-        console.log('error while notfication count ' , error)
+        setNotificationCount(res.data.count);
+      } catch (error) {
+        console.log("Error while fetching notification count", error);
       }
-    }
-    fetchNotificationCount()
-  },[])
+    };
+    if (reduxUser?.id) fetchNotificationCount();
+  }, [reduxUser]);
 
   const handleLogout = async () => {
     try {
@@ -106,22 +99,16 @@ const Nav = () => {
     navigate(path);
     setMobileMenuOpen(false);
   };
-    const toggleMobileMenu = () => {
+
+  const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
   };
-
-
 
   return (
     <>
       <nav className="flex items-center justify-between px-6 md:px-19 py-5 bg-zinc-100 border-b-2 border-gray-300 dark:bg-gray-800 transition-colors duration-300">
         <div>
-          <GlitchText
-            speed={1}
-            enableShadows={true}
-            enableOnHover={false}
-            className="custom-class"
-          >
+          <GlitchText speed={1} enableShadows={true} enableOnHover={false} className="custom-class">
             CODBLOG
           </GlitchText>
         </div>
@@ -134,9 +121,9 @@ const Nav = () => {
           <button
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-            className={`flex items-center w-15 h-8 p-[5px] cursor-pointer rounded-full ${
+            className={`flex items-center w-15 h-8 p-[5px] rounded-full ${
               theme === "light" ? "justify-start bg-gray-300" : "justify-end bg-purple-800"
-            } transition-colors duration-300 cursor-pointer`}
+            } transition-colors duration-300`}
           >
             <motion.div
               className={`w-5 h-5 ${
@@ -153,67 +140,37 @@ const Nav = () => {
                 onClick={() => navigateTo("/write-posts")}
                 className="w-9 h-9 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition"
               >
-                <Plus
-                  className="text-black dark:text-white group-hover:text-gray-500"
-                  size={18}
-                />
+                <Plus className="text-black dark:text-white group-hover:text-gray-500" size={18} />
               </button>
 
-<<<<<<< feature/post-notification
-              <button
-              
-                onClick={() => navigateTo("/notifications")}
-                className="cursor-pointer"
-              >
-                  <div className="relative inline-block ">
-
-                  <Bell className="text-black dark:text-white group-hover:text-gray-500" size={30} />
-
-                    <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                      {notificationCount}
-                    </span>
-                  
-                </div>
-
+              <button onClick={() => navigateTo("/notifications")} className="relative cursor-pointer">
+                <Bell className="text-black dark:text-white" size={30} />
+                {notificationCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                    {notificationCount}
+                  </span>
+                )}
               </button>
 
-              <Menu as="div" className="relative inline-block text-left">
-                <MenuButton className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition overflow-hidden">
-                  {user.profile_image ? (
-                    <img
-                      src={`${BASE_URL}${user.profile_image}`}
-=======
               <Menu as="div" className="relative inline-block text-left">
                 <MenuButton className="w-12 h-12 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition overflow-hidden">
                   {user?.profile_image ? (
                     <img
-                      src={`http://localhost:8000${user.profile_image}`}
->>>>>>> main
+                      src={`${BASE_URL}${user.profile_image}`}
                       alt="Profile"
                       className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <User
-                      className="text-black dark:text-white group-hover:text-gray-500"
-                      size={18}
-                    />
+                    <User className="text-black dark:text-white group-hover:text-gray-500" size={18} />
                   )}
                 </MenuButton>
 
-<<<<<<< feature/post-notification
-                <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-gray-800 shadow-lg ring- масштаб-1 ring-black/5 focus:outline-none z-50">
-=======
                 <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 focus:outline-none z-50">
->>>>>>> main
                   <div className="px-1 py-1">
                     <MenuItem>
                       {({ active }) => (
                         <button
-<<<<<<< feature/post-notification
                           onClick={() => navigateTo(`/view-profile/${user.id}`)}
-=======
-                          onClick={() => navigate(`/view-profile/${user?.id}`)}
->>>>>>> main
                           className={`${
                             active
                               ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"
@@ -228,11 +185,7 @@ const Nav = () => {
                     <MenuItem>
                       {({ active }) => (
                         <button
-<<<<<<< feature/post-notification
                           onClick={handleLogout}
-=======
-                          onClick={handleLogoutOut}
->>>>>>> main
                           className={`${
                             active
                               ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"
@@ -249,14 +202,12 @@ const Nav = () => {
               </Menu>
             </div>
           ) : (
-            <div>
-              <button
-                onClick={() => navigateTo("/login")}
-                className="p-2 w-20 cursor-pointer rounded-lg border border-gray-400 bg-zinc-100 font-montserrat font-bold tracking-wide text-black hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:text-black hover:text-gray-700 transition-colors duration-300 ease-in-out"
-              >
-                Login
-              </button>
-            </div>
+            <button
+              onClick={() => navigateTo("/login")}
+              className="p-2 w-20 cursor-pointer rounded-lg border border-gray-400 bg-zinc-100 font-montserrat font-bold tracking-wide text-black hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:text-black hover:text-gray-700 transition-colors duration-300 ease-in-out"
+            >
+              Login
+            </button>
           )}
         </div>
 
@@ -264,9 +215,9 @@ const Nav = () => {
           <button
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-            className={`flex items-center w-12 h-6 p-1 cursor-pointer rounded-full ${
+            className={`flex items-center w-12 h-6 p-1 rounded-full ${
               theme === "light" ? "justify-start bg-gray-300" : "justify-end bg-purple-800"
-            } transition-colors duration-300 cursor-pointer`}
+            } transition-colors duration-300`}
           >
             <motion.div
               className={`w-4 h-4 ${
