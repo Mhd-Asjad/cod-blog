@@ -10,8 +10,6 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
 
-# Create your views here.
-
 
 class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
