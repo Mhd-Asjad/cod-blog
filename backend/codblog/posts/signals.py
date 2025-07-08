@@ -74,9 +74,9 @@ def remove_follow_notification(sender, instance, **kwargs):
     async_to_sync(channel_layers.group_send)(
         f"user_{recipient_user.id}",  # Notify the one who got unfollowed
         {
-            'type': 'send_count_update',
-            'event_type': 'unfollow_notification',
-            'unread_count': count
+            "type": "send_count_update",
+            "event_type": "unfollow_notification",
+            "unread_count": count,
         },
     )
     if deleted:
@@ -154,5 +154,5 @@ def notify_on_like(sender, instance, action, pk_set, **kwargs):
                 "type": "send_count_update",
                 "event_type": "count_update",
                 "unread_count": count,
-            },
-        )
+            },
+        )

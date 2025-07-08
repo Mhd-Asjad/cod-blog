@@ -96,6 +96,9 @@ const Nav = () => {
         toast.success(data?.notification)
       }
 
+      if (notifications){
+        alert(data.notifications)
+      }
     } 
 
     socket.error = (error) => {
@@ -188,7 +191,7 @@ const Nav = () => {
               <button onClick={() => navigateTo("/notifications")} className="relative cursor-pointer">
                 <Bell className="text-black dark:text-white" size={30} />
                 {unread_count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-purple-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                     {unread_count}
                   </span>
                 )}

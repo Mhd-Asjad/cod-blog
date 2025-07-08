@@ -17,6 +17,7 @@ import {
   Clock,
   Pen,
 } from "lucide-react";
+import { User, Calendar, Mail, Users, FileText, Heart, MessageCircle , ArrowLeft, Clock,  } from "lucide-react";
 import Nav from "../components/Nav";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";

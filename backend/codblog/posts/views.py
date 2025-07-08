@@ -225,7 +225,6 @@ class PostSearchAPIView(APIView):
         serializer = PostSearchSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
 class PostLikeView(APIView):
     permission_classes = [IsAuthenticated]
 
