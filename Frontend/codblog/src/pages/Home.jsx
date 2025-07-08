@@ -34,19 +34,23 @@ const Home = () => {
   const [followingPage, setFollowingPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
+  const [selectedTab, setSelectedTab] = useState(0);
 
   useEffect(() => {
-    fetchExplorePosts();
-    if (isAuthenticated) {
-      fetchFollowingPosts();
+    if (selectedTab === 0) {
+      fetchExplorePosts(`posts/list-posts/?sort=${sortBy}&page=${explorePage}`);
+    } else if (isAuthenticated && selectedTab === 1) {
+      fetchFollowingPosts(
+        `posts/following-posts/?sort=${sortBy}&page=${followingPage}`
+      );
     }
-  }, [sortBy]);
+  }, [sortBy, selectedTab, explorePage, followingPage, isAuthenticated]);
 
   const fetchExplorePosts = async (
     url = `posts/list-posts/?sort=${sortBy}`
   ) => {
     try {
-      setLoading(true);
+      if (!explorePosts.length) setLoading(true);
       const relativeUrl = url.startsWith("http")
         ? url.replace("http://localhost:8000/", "")
         : url;
@@ -69,7 +73,8 @@ const Home = () => {
     url = `posts/following-posts/?sort=${sortBy}`
   ) => {
     try {
-      setLoading(true);
+      if (!followingPosts.length) setLoading(true);
+
       const relativeUrl = url.startsWith("http")
         ? url.replace("http://localhost:8000/", "")
         : url;
@@ -109,7 +114,7 @@ const Home = () => {
         className="group relative bg-white dark:bg-gray-800 cursor-pointer rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transform transition-all duration-500 hover:-translate-y-2 mb-8 border border-gray-100 dark:border-gray-700"
       >
         {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-p`urple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
         {/* Main content */}
         <div className="relative p-8">
@@ -190,8 +195,8 @@ const Home = () => {
           <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-6">
               <ActionButton icon={Heart} count={post.like || 0} />
-              {/* <ActionButton icon={MessageCircle} count={post.comments || 0} />
-              <ActionButton icon={Eye} count={post.views || 0} /> */}
+              <ActionButton icon={MessageCircle} count={post.comments || 0} />
+              <ActionButton icon={Eye} count={post.views || 0} />
             </div>
 
             <div className="flex items-center gap-3">
@@ -268,14 +273,14 @@ const Home = () => {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+    <div className="h-screen overflow-y-auto bg-gradient-to-br from-blue-500/60 via-white to-purple-300 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       <div className="sticky top-0 z-50">
         <Nav />
       </div>
 
       {/* Hero section */}
+      <div className="absolute h-screen z-0 inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 dark:from-purple-900/20 dark:to-blue-900/20" />
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 dark:from-purple-900/20 dark:to-blue-900/20" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -283,8 +288,19 @@ const Home = () => {
           className="relative px-4 max-w-6xl mx-auto pt-24 pb-12"
         >
           <motion.div variants={tabVariants} initial="hidden" animate="visible">
-            <Tab.Group>
+            <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
               <Tab.List className="flex space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-2 shadow-xl border border-white/20 dark:border-gray-700/50 mb-12 max-w-md mx-auto">
+                <Tab
+                  className={({ selected }) =>
+                    `flex-1 py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                      selected
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700 hover:text-purple-600"
+                    }`
+                  }
+                >
+                  Explore
+                </Tab>
                 {isAuthenticated && (
                   <Tab
                     className={({ selected }) =>
@@ -298,21 +314,34 @@ const Home = () => {
                     Following
                   </Tab>
                 )}
-                <Tab
-                  className={({ selected }) =>
-                    `flex-1 py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ${
-                      selected
-                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700 hover:text-purple-600"
-                    }`
-                  }
-                >
-                  Explore
-                </Tab>
               </Tab.List>
 
               <Tab.Panels>
                 <AnimatePresence mode="wait">
+                  <Tab.Panel>
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {explorePosts.length > 0 ? (
+                        renderPosts(explorePosts)
+                      ) : (
+                        <EmptyState
+                          title="No posts to explore"
+                          description="Check back later for new content"
+                        />
+                      )}
+                      <Pagination
+                        next={exploreNext}
+                        prev={explorePrev}
+                        page={explorePage}
+                        fetchNext={() => fetchExplorePosts(exploreNext)}
+                        fetchPrev={() => fetchExplorePosts(explorePrev)}
+                      />
+                    </motion.div>
+                  </Tab.Panel>
                   {isAuthenticated && (
                     <Tab.Panel>
                       <motion.div
@@ -339,30 +368,6 @@ const Home = () => {
                       </motion.div>
                     </Tab.Panel>
                   )}
-                  <Tab.Panel>
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      {explorePosts.length > 0 ? (
-                        renderPosts(explorePosts)
-                      ) : (
-                        <EmptyState
-                          title="No posts to explore"
-                          description="Check back later for new content"
-                        />
-                      )}
-                      <Pagination
-                        next={exploreNext}
-                        prev={explorePrev}
-                        page={explorePage}
-                        fetchNext={() => fetchExplorePosts(exploreNext)}
-                        fetchPrev={() => fetchExplorePosts(explorePrev)}
-                      />
-                    </motion.div>
-                  </Tab.Panel>
                 </AnimatePresence>
               </Tab.Panels>
             </Tab.Group>

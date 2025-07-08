@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const PrivateRoute = ({ children }) => {
-  const hasShownToast = useRef(false)
+  const hasShownToast = useRef(false);
   const { is_login } = useSelector((state) => state.auth);
 
   useEffect(() => {

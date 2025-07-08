@@ -48,6 +48,7 @@ const UserProfile = () => {
   const [followCount, setFollowCount] = useState(null);
 
   const [hasMore, setHasMore] = useState(false);
+  const reduxUser = useSelector((state) => state.auth.user);
 
 
   const navigate = useNavigate();

@@ -4,7 +4,11 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from django.db.models import Q, Count
 from rest_framework.views import APIView
@@ -104,7 +108,7 @@ class ListPostView(generics.ListAPIView):
             queryset = queryset.annotate(like_count=Count("like")).order_by(
                 "-like_count", "-created_at"
             )
-            
+
             print("least liked", queryset)
         else:
             queryset = queryset.order_by("-created_at")
@@ -343,60 +347,147 @@ class FollowedPostView(APIView):
 
 class list_notifications(APIView):
     def get(self, request, user_id):
-        notifications = Notifications.objects.filter(
-            recipient_id=user_id
-        ).select_related('sender').order_by('-created_at')
-        print('noticount' , notifications.count())
+        notifications = (
+            Notifications.objects.filter(recipient_id=user_id)
+            .select_related("sender")
+            .order_by("-created_at")
+        )
+        print("noticount", notifications.count())
 
         if not notifications.exists():
-            return Response({'message': 'No notifications found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "No notifications found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         data = [
             {
-                'id': n.id,
-                'sender': {
-                    'username': n.sender.username,
-                    'profile_image': request.build_absolute_uri(n.sender.profile_image.url)
-                    if n.sender.profile_image else None
+                "id": n.id,
+                "sender": {
+                    "username": n.sender.username,
+                    "profile_image": (
+                        request.build_absolute_uri(n.sender.profile_image.url)
+                        if n.sender.profile_image
+                        else None
+                    ),
                 },
-                'notification_type': n.notification_type,
-                'post_title': n.post.title if n.post else None,
-                'comment_content': n.comment.comment if n.comment else None,
-                'is_read': n.is_read,
-                'created_at': n.created_at,
+                "notification_type": n.notification_type,
+                "post_title": n.post.title if n.post else None,
+                "comment_content": n.comment.comment if n.comment else None,
+                "is_read": n.is_read,
+                "created_at": n.created_at,
             }
             for n in notifications
         ]
 
-        return Response({ 'notification_data' : data , 'count' : notifications.count()}, status=status.HTTP_200_OK)
+        return Response(
+            {"notification_data": data, "count": notifications.count()},
+            status=status.HTTP_200_OK,
+        )
+
+
 class notification_actions(APIView):
-    def post(self , request , notification_id):
+    def post(self, request, notification_id):
         try:
             data = request.data
-            action = data.get('action')
-            
+            action = data.get("action")
+
             notification = get_object_or_404(
-                request.user.notifications , 
-                id = notification_id
+                request.user.notifications, id=notification_id
             )
-            
-            if action == 'mark_read':
+
+            if action == "mark_read":
                 notification.is_read = True
                 notification.save()
-                return Response({'message' : 'marked as read'},status=status.HTTP_200_OK)
-                
-            if action == 'mark_unread':
+                return Response(
+                    {"message": "marked as read"}, status=status.HTTP_200_OK
+                )
+
+            if action == "mark_unread":
                 notification.is_read = False
                 notification.save()
-                return Response({'message' : 'marked as unread'},status=status.HTTP_200_OK)
-                
-            elif action == 'delete' :
+                return Response(
+                    {"message": "marked as unread"}, status=status.HTTP_200_OK
+                )
+
+            elif action == "delete":
                 notification.delete()
-                return Response({'message' : 'notification deleted'},status=status.HTTP_200_OK)
-            
-            else :
-                return Response({'message' : 'notification deleted'},status=status.HTTP_400_BAD_REQUEST)
-            
-        except Exception as e :
-            print( 'error on not actions' ,str(e))
-            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {"message": "notification deleted"}, status=status.HTTP_200_OK
+                )
+
+            else:
+                return Response(
+                    {"message": "notification deleted"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        except Exception as e:
+            print("error on not actions", str(e))
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ListCommentView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        post_id = self.kwargs.get("post_id")
+        try:
+            Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Comment.objects.none()
+
+        return Comment.objects.filter(post__id=post_id, parent=None).order_by(
+            "-created_at"
+        )
+
+
+class CreateCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.get("comment_data")
+        post_id = data.get("post_id")
+        comment_text = data.get("comment")
+        parent_id = data.get("parent_id")
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response(
+                {"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        parent = None
+        if parent_id:
+            try:
+                parent = Comment.objects.get(id=parent_id)
+            except Comment.DoesNotExist:
+                return Response(
+                    {"error": "Parent Comment not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        comment_instance = Comment.objects.create(
+            user=request.user, post=post, comment=comment_text, parent=parent
+        )
+        serializer = CommentSerializer(comment_instance)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UpdateCommentView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    lookup_url_kwarg = "comment_id"
+    lookup_field = "id"
+
+
+class DeleteCommentView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    lookup_url_kwarg = "comment_id"
+    lookup_field = "id"

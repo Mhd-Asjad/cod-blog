@@ -111,18 +111,16 @@ const ShowPost = () => {
   const [likes, setLikes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [likeLoading, setLikeLoading] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await api.get(`posts/show-post/${id}/`);
         if (response.status === 200) {
-          console.log(JSON.stringify(response.data))
+          console.log(JSON.stringify(response.data));
           setPost(response.data);
           setIsLiked(response.data.is_liked);
           setLikes(response.data.like);
-
         }
       } catch (error) {
         setError(error);
@@ -186,7 +184,7 @@ const ShowPost = () => {
   return (
     <div className="min-h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
       <div className="sticky top-0 z-50">
-      <Nav />
+        <Nav />
       </div>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <motion.div
