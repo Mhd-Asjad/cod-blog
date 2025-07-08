@@ -258,30 +258,33 @@ const ShowUserDetail = () => {
                 </div>
               </div>
 
-              {/* Follow Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleFollowToggle}
-                disabled={followingLoading}
-                className={`px-8 py-3 rounded-full text-sm font-semibold shadow-lg transition-all duration-200 ${
-                  isFollowing
-                    ? "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600"
-                    : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {followingLoading ? (
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <Users size={16} className="mr-2" />
-                    {isFollowing ? "Following" : "Follow"}
-                  </div>
-                )}
-              </motion.button>
+              {!parseInt(id) === reduxUser.id && (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleFollowToggle}
+                    disabled={followingLoading}
+                    className={`px-8 py-3 rounded-full text-sm font-semibold shadow-lg transition-all duration-200 ${
+                      isFollowing
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:from-red-600 hover:to-pink-600"
+                        : "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {followingLoading ? (
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Users size={16} className="mr-2" />
+                        {isFollowing ? "Following" : "Follow"}
+                      </div>
+                    )}
+                  </motion.button>
+                </>
+              )}
             </div>
           </motion.div>
         </div>

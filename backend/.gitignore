@@ -24,6 +24,7 @@ media/
 # Environment variables
 .env
 
+
 **/migrations/
 */migrations/.py
 */migrations/.pyc

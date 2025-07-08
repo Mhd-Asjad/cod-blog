@@ -30,6 +30,11 @@ urlpatterns = [
     ),
     path("following-posts/", FollowedPostView.as_view(), name="following-posts"),
     path('list-notifications/<int:user_id>/',list_notifications.as_view() , name='list-notifications'),
-    path('notification-actions/<int:notification_id>/',notification_actions.as_view() , name='notification-actions')
+    path('notification-actions/<int:notification_id>/',notification_actions.as_view() , name='notification-actions'),
+    
+    path('list-comment/<int:post_id>/', ListCommentView.as_view(), name="list-comment"),
+    path('create-comment/', CreateCommentView.as_view(), name="create-comment"),
+    path('update-comment/<int:comment_id>/', UpdateCommentView.as_view(), name="update-comment"),
+    path('delete-comment/<int:comment_id>/', DeleteCommentView.as_view(), name="delete-comment"),
 
 ]

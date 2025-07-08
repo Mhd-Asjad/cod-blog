@@ -12,11 +12,12 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
+import { setUnreadCount } from "../store/notificationsSlice";
 import GlitchText from "./Glitch";
 import useApi from "./useApi";
 import { removeLogin } from "../store/slice";
 import DynamicSearch from "./DynamicSearch";
+import { toast } from "react-toastify";
 
 const BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -26,10 +27,10 @@ const Nav = () => {
   const api = useApi();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [ socket , setSocket] = useState(null);
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(0);
+  const unread_count = useSelector((state) => state.notifications.unread_count)
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem("theme");
     return saved
@@ -69,10 +70,51 @@ const Nav = () => {
   }, [api, is_login]);
 
   useEffect(() => {
+    if (!reduxUser?.id) return
+
+    const socket = new WebSocket(`ws://localhost:8000/ws/notifications/${reduxUser.id}/`)
+    setSocket(socket);
+
+    socket.onopen = () => {
+      console.log("✅ Websocket connected")
+    }
+
+    socket.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      console.log("📨 Incoming Notification:", data);
+
+      if (data.type === "follow_notification"){ 
+        dispatch(setUnreadCount(data.unread_count))
+        toast.success(data.message)
+
+      } else if(data.type === "like_notification"){
+        dispatch(setUnreadCount(data.unread_count))
+        toast.success(data.message)
+
+      }else {
+        dispatch(setUnreadCount(data.unread_count))
+        toast.success(data?.notification)
+      }
+
+    } 
+
+    socket.error = (error) => {
+      console.error('websocket error : ', error)
+    }
+    socket.onclose = () => {
+      console.log("🔌 Disconnected, retrying...");
+    };
+    return () => {
+      socket.close();
+    }
+
+  },[reduxUser?.id])
+
+  useEffect(() => {
     const fetchNotificationCount = async () => {
       try {
         const res = await api.get(`posts/list-notifications/${reduxUser.id}`);
-        setNotificationCount(res.data.count);
+        dispatch(setUnreadCount(res.data.count));
       } catch (error) {
         console.log("Error while fetching notification count", error);
       }
@@ -103,7 +145,7 @@ const Nav = () => {
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
   };
-
+  console.log('component rerendered')
   return (
     <>
       <nav className="flex items-center justify-between px-6 md:px-19 py-5 bg-zinc-100 border-b-2 border-gray-300 dark:bg-gray-800 transition-colors duration-300">
@@ -145,9 +187,9 @@ const Nav = () => {
 
               <button onClick={() => navigateTo("/notifications")} className="relative cursor-pointer">
                 <Bell className="text-black dark:text-white" size={30} />
-                {notificationCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                    {notificationCount}
+                {unread_count > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-purple-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                    {unread_count}
                   </span>
                 )}
               </button>
@@ -307,4 +349,4 @@ const Nav = () => {
   );
 };
 
-export default Nav;
+export default Nav;

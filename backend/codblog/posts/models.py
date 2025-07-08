@@ -20,12 +20,18 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     user = models.ForeignKey(user, on_delete=models.CASCADE)
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def _str_(self):
         return f"{self.post.title} - {self.comment[:11]}....."
+    
+
+    @property
+    def is_reply(self):
+        return self.parent is not None
 
 class Follow(models.Model):    
     follower = models.ForeignKey(user, related_name="following", on_delete=models.CASCADE) # this field will stores the user who clicked "follow" (the one initiating the action)
