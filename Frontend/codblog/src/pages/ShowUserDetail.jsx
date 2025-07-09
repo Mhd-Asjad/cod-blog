@@ -7,17 +7,13 @@ import {
   User,
   Calendar,
   Mail,
-  MapPin,
   Users,
   FileText,
   Heart,
   MessageCircle,
-  Share2,
   ArrowLeft,
   Clock,
-  Pen,
 } from "lucide-react";
-import { User, Calendar, Mail, Users, FileText, Heart, MessageCircle , ArrowLeft, Clock,  } from "lucide-react";
 import Nav from "../components/Nav";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -259,7 +255,7 @@ const ShowUserDetail = () => {
                 </div>
               </div>
 
-              {!parseInt(id) === reduxUser.id && (
+              {parseInt(id) !== reduxUser.id && (
                 <>
                   <motion.button
                     whileHover={{ scale: 1.05 }}

@@ -4,6 +4,7 @@ import {
   Menu as LucideMenu,
   Plus,
   Search,
+  MessageCircle ,
   User,
   X,
   Bell
@@ -17,7 +18,7 @@ import GlitchText from "./Glitch";
 import useApi from "./useApi";
 import { removeLogin } from "../store/slice";
 import DynamicSearch from "./DynamicSearch";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -82,18 +83,14 @@ const Nav = () => {
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
       console.log("📨 Incoming Notification:", data);
-
-      if (data.type === "follow_notification"){ 
+      if (["comment_notification" , "follow_notification","like_notification"].includes(data.type)){
         dispatch(setUnreadCount(data.unread_count))
-        toast.success(data.message)
-
-      } else if(data.type === "like_notification"){
-        dispatch(setUnreadCount(data.unread_count))
-        toast.success(data.message)
-
+        toast(data.message,{
+          icon: <MessageCircle/>
+        })
       }else {
         dispatch(setUnreadCount(data.unread_count))
-        toast.success(data?.notification)
+        toast(data?.notification)
       }
 
       if (notifications){
@@ -352,4 +349,4 @@ const Nav = () => {
   );
 };
 
-export default Nav;
+export default Nav;

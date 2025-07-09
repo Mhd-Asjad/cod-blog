@@ -15,14 +15,25 @@ def notify_on_comment(sender, instance, created, **kwargs):
         print("comment triggeredd....")
         # not let post user get notifications
         if instance.user != instance.post.author:
-            create_notifications.delay(
+            Notifications.objects.create(
                 recipient_id=instance.post.author.id,
-                sender_id=instance.user.id,
+                sender=instance.user,
                 notification_type="comment",
                 post_id=instance.post.id,
                 comment_id=instance.id,
             )
-            # count = Notifications.objects.filter(recipie)
+            count = Notifications.objects.filter(recipient=instance.post.author , is_read=False).count()
+            channel_layer = get_channel_layer()
+            
+            async_to_sync(channel_layer.group_send)(
+                f'user_{instance.post.author.id}',
+                {
+                    "type" : "send_notification",
+                    "event_type" : "comment_notification",
+                    "message" : f"you have new comment on {instance.post.title[:11]}",
+                    "unread_count" : count
+                }
+            )
 
 
 @receiver(post_save, sender=Follow)
@@ -51,7 +62,6 @@ def notify_on_follow(sender, instance, created, **kwargs):
                 "unread_count": count,
             },
         )
-
 
 @receiver(post_delete, sender=Follow)
 def remove_follow_notification(sender, instance, **kwargs):
@@ -154,5 +164,5 @@ def notify_on_like(sender, instance, action, pk_set, **kwargs):
                 "type": "send_count_update",
                 "event_type": "count_update",
                 "unread_count": count,
-            },
-        )
+            },
+        )

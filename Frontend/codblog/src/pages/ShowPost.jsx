@@ -8,6 +8,7 @@ import Nav from "../components/Nav";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { toast } from "react-toastify";
+import Comments from "./Comments";
 
 const renderBlock = (block) => {
   switch (block.type) {
@@ -182,11 +183,12 @@ const ShowPost = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
+    <div className="min-h-screen h-screen overflow-y-auto bg-zinc-100 dark:bg-gray-800">
       <div className="sticky top-0 z-50">
         <Nav />
       </div>
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      
+      <div className="max-w-4xl mx-auto px-4 py-12 ">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -258,6 +260,9 @@ const ShowPost = () => {
             )}
           </div>
         </motion.div>
+
+
+        <Comments postId={id} />
       </div>
     </div>
   );

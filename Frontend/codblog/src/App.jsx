@@ -12,12 +12,14 @@ import { ToastContainer } from "react-toastify";
 import UserProfile from "./pages/UserProfile";
 import EditPost from "./pages/EditPost";
 import ShowNotifications from "./pages/ShowNotifications";
-
+import WebSocketManager from "./components/socketprovider/WebSocketManager";
 const App = () => {
   return (
     <div className=" h-screen relative overflow-hidden">
       <Router>
         <AuthProvider>
+        <WebSocketManager/>
+
           <Routes>
             <Route
               path="/login"

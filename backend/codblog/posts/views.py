@@ -448,10 +448,11 @@ class CreateCommentView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        print(request.data)
         data = request.data.get("comment_data")
         post_id = data.get("post_id")
         comment_text = data.get("comment")
-        parent_id = data.get("parent_id")
+        parent_id = data.get("parent_id" , None)
 
         try:
             post = Post.objects.get(id=post_id)
@@ -476,14 +477,13 @@ class CreateCommentView(APIView):
         serializer = CommentSerializer(comment_instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
 class UpdateCommentView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = "comment_id"
     lookup_field = "id"
-
+    http_method_names = ['put' , 'patch']
 
 class DeleteCommentView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]

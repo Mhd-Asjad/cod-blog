@@ -22,11 +22,15 @@ class  NotificationConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         
         print(f'websocket connection closed with code : {close_code}')
-        await self.channel_layer.group_discard(
-            self.user_group_name,
-            self.channel_name
-        )
-        
+        try:
+
+            await self.channel_layer.group_discard(
+                self.user_group_name,
+                self.channel_name
+            )
+        except Exception as e :
+            print(f"Error during disconnect: {str(e)}")
+     
     async def send_notification(self, event):
         print(f"Websocker Consumer received: {event}")
         await self.send(text_data=json.dumps({
@@ -41,7 +45,7 @@ class  NotificationConsumer(AsyncWebsocketConsumer):
             "notification": event["notification"],
             'unread_count': event.get('unread_count' , 0)
         }))
-        
+            
     async def send_count_update(self, event):
         await self.send(text_data=json.dumps({
             "type": event.get('event_type', 'count_update'),
@@ -52,6 +56,5 @@ class  NotificationConsumer(AsyncWebsocketConsumer):
     def is_valid_user(self):
         try :
             return User.objects.filter(id=self.user_id).exists()
-        
         except:
             return False

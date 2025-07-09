@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Toaster } from "@/components/ui/sonner";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")).render(
       <PersistGate loading={null} persistor={persistor}>
         <GoogleOAuthProvider clientId= {import.meta.env.VITE_GOOGLE_CLIENT_ID} >
           <App />
+          <Toaster position="top-right" />
         </GoogleOAuthProvider>
       </PersistGate>
     </Provider>
