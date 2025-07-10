@@ -178,15 +178,11 @@
 
 ### Planned Features
 - [ ] **Mobile App** (React Native)
-- [ ] **Advanced Search** with filters and tags
 - [ ] **Post Categories** and tagging system
 - [ ] **Email Notifications** for important updates
-- [ ] **Content Moderation** with AI assistance
 - [ ] **Analytics Dashboard** for content creators
-- [ ] **Dark Mode** toggle
 - [ ] **Multi-language Support**
 - [ ] **Post Scheduling** functionality
-- [ ] **Image Upload** and optimization
 
 ### Technical Improvements
 - [ ] **Docker Containerization**
