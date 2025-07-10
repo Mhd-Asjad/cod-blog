@@ -4,10 +4,10 @@ import {
   Menu as LucideMenu,
   Plus,
   Search,
-  MessageCircle ,
+  MessageCircle,
   User,
   X,
-  Bell
+  Bell,
 } from "lucide-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
@@ -28,10 +28,10 @@ const Nav = () => {
   const api = useApi();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [ socket , setSocket] = useState(null);
+  const [socket, setSocket] = useState(null);
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const unread_count = useSelector((state) => state.notifications.unread_count)
+  const unread_count = useSelector((state) => state.notifications.unread_count);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem("theme");
     return saved
@@ -71,44 +71,50 @@ const Nav = () => {
   }, [api, is_login]);
 
   useEffect(() => {
-    if (!reduxUser?.id) return
+    if (!reduxUser?.id) return;
 
-    const socket = new WebSocket(`ws://localhost:8000/ws/notifications/${reduxUser.id}/`)
+    const socket = new WebSocket(
+      `ws://localhost:8000/ws/notifications/${reduxUser.id}/`
+    );
     setSocket(socket);
 
     socket.onopen = () => {
-      console.log("✅ Websocket connected")
-    }
+      console.log("✅ Websocket connected");
+    };
 
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
       console.log("📨 Incoming Notification:", data);
-      if (["comment_notification" , "follow_notification","like_notification"].includes(data.type)){
-        dispatch(setUnreadCount(data.unread_count))
-        toast(data.message,{
-          icon: <MessageCircle/>
-        })
-      }else {
-        dispatch(setUnreadCount(data.unread_count))
-        toast(data?.notification)
+      if (data.type === "count_update") {
+        console.log("coming.....");
+        dispatch(setUnreadCount(data.unread_count));
+      } else if (
+        [
+          "comment_notification",
+          "follow_notification",
+          "like_notification",
+        ].includes(data.type)
+      ) {
+        dispatch(setUnreadCount(data.unread_count));
+        toast(data.message, {
+          icon: <MessageCircle />,
+        });
+      } else {
+        dispatch(setUnreadCount(data.unread_count));
+        toast(data?.notification);
       }
-
-      if (notifications){
-        alert(data.notifications)
-      }
-    } 
+    };
 
     socket.error = (error) => {
-      console.error('websocket error : ', error)
-    }
+      console.error("websocket error : ", error);
+    };
     socket.onclose = () => {
       console.log("🔌 Disconnected, retrying...");
     };
     return () => {
       socket.close();
-    }
-
-  },[reduxUser?.id])
+    };
+  }, [reduxUser?.id]);
 
   useEffect(() => {
     const fetchNotificationCount = async () => {
@@ -145,26 +151,36 @@ const Nav = () => {
   const toggleMobileMenu = () => {
     setMobileMenuOpen((prev) => !prev);
   };
-  console.log('component rerendered')
+
+  console.log("component rerendered");
   return (
     <>
       <nav className="flex items-center justify-between px-6 md:px-19 py-5 bg-zinc-100 border-b-2 border-gray-300 dark:bg-gray-800 transition-colors duration-300">
         <div>
-          <GlitchText speed={1} enableShadows={true} enableOnHover={false} className="custom-class">
+          <GlitchText
+            speed={1}
+            enableShadows={true}
+            enableOnHover={false}
+            className="custom-class"
+          >
             CODBLOG
           </GlitchText>
         </div>
 
-        <div className="hidden sm:block relative w-64 md:w-90">
+        <div className="hidden md:block relative w-64 md:w-90">
           <DynamicSearch className="w-full" />
         </div>
 
         <div className="hidden md:flex items-center gap-6">
           <button
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            aria-label={`Switch to ${
+              theme === "light" ? "dark" : "light"
+            } mode`}
             className={`flex items-center w-15 h-8 p-[5px] rounded-full ${
-              theme === "light" ? "justify-start bg-gray-300" : "justify-end bg-purple-800"
+              theme === "light"
+                ? "justify-start bg-gray-300"
+                : "justify-end bg-purple-800"
             } transition-colors duration-300`}
           >
             <motion.div
@@ -182,10 +198,16 @@ const Nav = () => {
                 onClick={() => navigateTo("/write-posts")}
                 className="w-9 h-9 rounded-full border group cursor-pointer border-gray-400 dark:border-gray-600 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition"
               >
-                <Plus className="text-black dark:text-white group-hover:text-gray-500" size={18} />
+                <Plus
+                  className="text-black dark:text-white group-hover:text-gray-500"
+                  size={18}
+                />
               </button>
 
-              <button onClick={() => navigateTo("/notifications")} className="relative cursor-pointer">
+              <button
+                onClick={() => navigateTo("/notifications")}
+                className="relative cursor-pointer"
+              >
                 <Bell className="text-black dark:text-white" size={30} />
                 {unread_count > 0 && (
                   <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
@@ -203,7 +225,10 @@ const Nav = () => {
                       className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <User className="text-black dark:text-white group-hover:text-gray-500" size={18} />
+                    <User
+                      className="text-black dark:text-white group-hover:text-gray-500"
+                      size={18}
+                    />
                   )}
                 </MenuButton>
 
@@ -256,9 +281,13 @@ const Nav = () => {
         <div className="flex md:hidden items-center gap-4">
           <button
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            aria-label={`Switch to ${
+              theme === "light" ? "dark" : "light"
+            } mode`}
             className={`flex items-center w-12 h-6 p-1 rounded-full ${
-              theme === "light" ? "justify-start bg-gray-300" : "justify-end bg-purple-800"
+              theme === "light"
+                ? "justify-start bg-gray-300"
+                : "justify-end bg-purple-800"
             } transition-colors duration-300`}
           >
             <motion.div
@@ -274,7 +303,7 @@ const Nav = () => {
             onClick={toggleMobileMenu}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenuOpen}
-            className="text-black dark:text-white p-1"
+            className="text-black dark:text-white p-1 cursor-pointer"
           >
             {mobileMenuOpen ? <X size={24} /> : <LucideMenu size={24} />}
           </button>
@@ -291,7 +320,23 @@ const Nav = () => {
         >
           <div className="px-4 py-2">
             <div className="mb-2 relative">
-              <DynamicSearch className="w-full" />
+              <DynamicSearch
+                notification={
+                  is_login && (
+                    <button
+                      onClick={() => navigateTo("/notifications")}
+                      className="relative cursor-pointer"
+                    >
+                      <Bell className="text-black dark:text-white" size={30} />
+                      {unread_count > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                          {unread_count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                }
+              />
             </div>
 
             {is_login && user ? (

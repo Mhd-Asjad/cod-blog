@@ -107,6 +107,8 @@ def notify_on_like(sender, instance, action, pk_set, **kwargs):
                 notification_type="like",
                 post=instance,
             ).exists()
+            
+                
 
             if not exists and instance.author != user:
                 print("like is created")
@@ -143,7 +145,7 @@ def notify_on_like(sender, instance, action, pk_set, **kwargs):
         for user_id in pk_set:
             user = User.objects.get(id=user_id)
 
-            deleted, _ = Notifications.objects.filter(
+            deleted = Notifications.objects.filter(
                 recipient=instance.author,
                 sender=user,
                 notification_type="like",

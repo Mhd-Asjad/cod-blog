@@ -14,7 +14,6 @@ const sortOptions = [
 ];
 
 const SortFilter = () => {
-
   const [isOpen, setIsOpen] = useState(false);
   const sortBy = useSelector((state) => state.filter.sortBy);
   const currentOption = sortOptions.find((opt) => opt.value === sortBy);
@@ -27,7 +26,7 @@ const SortFilter = () => {
         className="inline-flex items-center cursor-pointer px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition focus:outline-none"
         title="Sort Filter"
       >
-        <Filter size={18}  />
+        <Filter size={18} />
         <ChevronDown className="ml-1 h-4 w-4" />
       </button>
 
@@ -67,7 +66,7 @@ const SortFilter = () => {
   );
 };
 
-const DynamicSearch = ({ className = "" }) => {
+const DynamicSearch = ({ className = "", notification }) => {
   const api = useApi();
   const navigate = useNavigate();
 
@@ -148,6 +147,7 @@ const DynamicSearch = ({ className = "" }) => {
         </div>
 
         <SortFilter sortBy={sortBy} />
+        {notification}
       </div>
 
       {showDropdown && query && (
