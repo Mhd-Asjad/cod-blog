@@ -194,14 +194,16 @@
 
 ## 👨‍💻 Contributors
 
- **Amraz Rafeeque** 
-   -Integrated core features across frontend and backend
-   -Designed and developed intuitive UI/UX components
-   -Managed seamless communication between Django and React
- **Mhd Asjad** 
-   -Built and optimized the notification system
-   -Implemented real-time interactions using WebSockets
-   -Handled collaboration logic and state synchronization
+### ✨ Amraz Rafeeque  
+- Integrated core features across frontend and backend  
+- Designed and developed intuitive UI/UX components  
+- Managed seamless communication between Django and React  
+
+### ⚙️ Mhd Asjad  
+- Built and optimized the notification system  
+- Implemented real-time interactions using WebSockets  
+- Handled collaboration logic and state synchronization  
+
 
 ## 🛠️ Development Background
 
