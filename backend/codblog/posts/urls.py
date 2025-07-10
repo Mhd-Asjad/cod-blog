@@ -7,6 +7,8 @@ urlpatterns = [
     path("upload-image/", upload_image, name="upload-image"),
     path("fetch-url/", fetch_url, name="fetch-url"),
     path("list-posts/", ListPostView.as_view(), name="list-posts"),
+    path("save-post/", SavedPostsListView.as_view(), name="get-saved-posts"),
+    path("save-post/<int:post_id>/", ToggleSavePostView.as_view(), name="toggle-save-post"),  
     path("show-post/<int:pk>/", ShowPostDetailView.as_view(), name="show-post"),
     path(
         "public-profile/<int:user_id>/",

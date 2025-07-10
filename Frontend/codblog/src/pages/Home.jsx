@@ -11,17 +11,23 @@ import {
   MessageCircle,
   Share2,
   Bookmark,
+  BookmarkPlus,
+  CheckCircle,
+  BookmarkCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Tab } from "@headlessui/react";
 import { useSelector } from "react-redux";
+import ActionButton from "@/components/ActionButton";
 
 const Home = () => {
   const api = useApi();
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state) => state.auth.is_login);
   const sortBy = useSelector((state) => state.filter.sortBy);
+
+  const [savedPostIds, setSavedPostIds] = useState(new Set());
 
   const [explorePosts, setExplorePosts] = useState([]);
   const [exploreNext, setExploreNext] = useState(null);
@@ -37,6 +43,23 @@ const Home = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   useEffect(() => {
+    const fetchSavedPostIds = async () => {
+      if (isAuthenticated) {
+        try {
+          const res = await api.get("posts/save-post/");
+          if (res.status === 200) {
+            const savedIds = new Set(res.data.map((post) => post.id));
+            setSavedPostIds(savedIds);
+          }
+        } catch (error) {
+          console.error("Error fetching saved post ids");
+        }
+      }
+    };
+    fetchSavedPostIds();
+  }, [api, isAuthenticated]);
+
+  useEffect(() => {
     if (selectedTab === 0) {
       fetchExplorePosts(`posts/list-posts/?sort=${sortBy}&page=${explorePage}`);
     } else if (isAuthenticated && selectedTab === 1) {
@@ -44,13 +67,13 @@ const Home = () => {
         `posts/following-posts/?sort=${sortBy}&page=${followingPage}`
       );
     }
+    setLoading(false);
   }, [sortBy, selectedTab, explorePage, followingPage, isAuthenticated]);
 
   const fetchExplorePosts = async (
     url = `posts/list-posts/?sort=${sortBy}`
   ) => {
     try {
-      if (!explorePosts.length) setLoading(true);
       const relativeUrl = url.startsWith("http")
         ? url.replace("http://localhost:8000/", "")
         : url;
@@ -64,8 +87,6 @@ const Home = () => {
       }
     } catch (error) {
       toast.error("Couldn't load Explore posts");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -73,8 +94,6 @@ const Home = () => {
     url = `posts/following-posts/?sort=${sortBy}`
   ) => {
     try {
-      if (!followingPosts.length) setLoading(true);
-
       const relativeUrl = url.startsWith("http")
         ? url.replace("http://localhost:8000/", "")
         : url;
@@ -88,8 +107,6 @@ const Home = () => {
       }
     } catch (error) {
       toast.error("Couldn't load Following posts");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -105,7 +122,7 @@ const Home = () => {
   const renderPosts = (posts) =>
     posts.map((post, index) => (
       <motion.div
-        key={post.id}
+        key={post.id || `post-${index}`}
         variants={postVariants}
         initial="hidden"
         animate="visible"
@@ -195,13 +212,23 @@ const Home = () => {
           <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-6">
               <ActionButton icon={Heart} count={post.like || 0} />
-              <ActionButton icon={MessageCircle} count={post.comments || 0} />
-              <ActionButton icon={Eye} count={post.views || 0} />
+              <ActionButton
+                icon={MessageCircle}
+                count={post.comment_count || 0}
+              />
+              {/* <ActionButton icon={Eye} count={post.views || 0} /> */}
             </div>
 
             <div className="flex items-center gap-3">
-              <ActionButton icon={Bookmark} />
-              <ActionButton icon={Share2} />
+              <ActionButton
+                postId={post.id}
+                isSave={true}
+                savePostIds={savedPostIds}
+                setSavedPostIds={setSavedPostIds}
+                isSaved={savedPostIds.has(post.id)}
+                icon={savedPostIds.has(post.id) ? BookmarkCheck : BookmarkPlus}
+              />
+              <ActionButton postId={post.id} icon={Share2} isShare={true} />
             </div>
           </div>
         </div>
@@ -211,21 +238,7 @@ const Home = () => {
       </motion.div>
     ));
 
-  const ActionButton = ({ icon: Icon, count }) => (
-    <button
-      onClick={(e) => e.stopPropagation()}
-      className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 group/btn"
-    >
-      <Icon
-        size={18}
-        className="group-hover/btn:scale-110 transition-transform duration-200"
-      />
-      {count !== undefined && (
-        <span className="text-sm font-medium">{count}</span>
-      )}
-    </button>
-  );
-
+  
   const postVariants = {
     hidden: {
       opacity: 0,
@@ -260,14 +273,13 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-        <div className="relative">
-          <HashLoader color="#8b5cf6" size={80} />
-          <div className="absolute inset-0 rounded-full bg-purple-500/20 blur-xl animate-pulse" />
+      <div className="h-screen flex items-center justify-center text-center">
+        <div className="flex flex-col items-center">
+          <HashLoader color="#8B5CF6" size={60} />
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            Loading Post Contents...
+          </p>
         </div>
-        <p className="mt-8 text-lg font-medium text-gray-600 dark:text-gray-300 animate-pulse">
-          Loading amazing content...
-        </p>
       </div>
     );
   }
@@ -277,6 +289,7 @@ const Home = () => {
       <div className="sticky top-0 z-50">
         <Nav />
       </div>
+
 
       {/* Hero section */}
       <div className="absolute h-screen z-0 inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 dark:from-purple-900/20 dark:to-blue-900/20" />
@@ -317,8 +330,8 @@ const Home = () => {
               </Tab.List>
 
               <Tab.Panels>
-                <AnimatePresence mode="wait">
-                  <Tab.Panel>
+                <AnimatePresence>
+                  <Tab.Panel key="explore-panel">
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -341,7 +354,7 @@ const Home = () => {
                         fetchPrev={() => fetchExplorePosts(explorePrev)}
                       />
                     </motion.div>
-                  </Tab.Panel>
+                  </Tab.Panel >
                   {isAuthenticated && (
                     <Tab.Panel>
                       <motion.div

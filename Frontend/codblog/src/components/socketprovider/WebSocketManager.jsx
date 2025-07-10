@@ -9,11 +9,10 @@ const WebSocketManager = () => {
   const socketRef = useRef(null);
   const reconnectTimerRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
-  console.log('inside websocket provider')
   const connectWebSocket = () => {  
     if (!reduxUser?.id) return;
     
-    const socket = new WebSocket(`ws://localhost:8000/ws/notifications/${reduxUser.id}/`);
+    const socket = new WebSocket(`${import.meta.VITE_WEBSOCKET_URL}/ws/notifications/${reduxUser.id}/`);
     console.log(socket)
     socketRef.current = socket;
 

@@ -116,6 +116,39 @@ class ListPostView(generics.ListAPIView):
         return queryset
 
 
+class SavedPostsListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = HomePostSerializer
+
+    def get_queryset(self):
+        return Post.objects.filter(saved_by=self.request.user)
+
+
+class ToggleSavePostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response(
+                {"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        user = request.user
+        saved = False
+        if user in post.saved_by.all():
+            post.saved_by.remove(user)
+        else:
+            post.saved_by.add(user)
+            saved = True
+
+        return Response(
+            {"saved": saved},
+            status=status.HTTP_201_CREATED if saved else status.HTTP_200_OK,
+        )
+
+
 class ShowPostDetailView(APIView):
     permission_classes = [AllowAny]
 
@@ -224,6 +257,7 @@ class PostSearchAPIView(APIView):
 
         serializer = PostSearchSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class PostLikeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -452,7 +486,7 @@ class CreateCommentView(APIView):
         data = request.data.get("comment_data")
         post_id = data.get("post_id")
         comment_text = data.get("comment")
-        parent_id = data.get("parent_id" , None)
+        parent_id = data.get("parent_id", None)
 
         try:
             post = Post.objects.get(id=post_id)
@@ -477,13 +511,15 @@ class CreateCommentView(APIView):
         serializer = CommentSerializer(comment_instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class UpdateCommentView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_url_kwarg = "comment_id"
     lookup_field = "id"
-    http_method_names = ['put' , 'patch']
+    http_method_names = ["put", "patch"]
+
 
 class DeleteCommentView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]

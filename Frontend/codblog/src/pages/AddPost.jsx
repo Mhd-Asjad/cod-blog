@@ -10,17 +10,19 @@ import useApi from "../components/useApi";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Chatbot from "@/components/Chatbot";
 
 const AddPost = () => {
   const api = useApi();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const ejsInstance = useRef(null);
   const [canSave, setCanSave] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (!user) {
-      console.log('No user found')
+      console.log("No user found");
       return;
     }
 
@@ -75,7 +77,7 @@ const AddPost = () => {
                   byFile: "http://localhost:8000/api/posts/upload-image/",
                   byUrl: "http://localhost:8000/api/posts/fetch-url/",
                 },
-                field : 'image',
+                field: "image",
                 types: "image/*",
               },
             },
@@ -151,9 +153,9 @@ const AddPost = () => {
       const response = await api.post("posts/create-posts/", payload);
 
       if (response.status === 201) {
-        toast.success("You have published a new post.")
+        toast.success("You have published a new post.");
         console.log(`Post saved successfully 🎉🎉🎉🎉`);
-        navigate("/")
+        navigate("/");
       }
     } catch (error) {
       console.error(`Error while saving post: ${error}`);
@@ -163,23 +165,32 @@ const AddPost = () => {
   return (
     <div className="h-screen overflow-auto bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
       <div className="sticky top-0 z-50">
-      <Nav />
+        <Nav />
       </div>
       <div className="p-6 dark:text-white font-montserrat">
         <div id="editorjs" className="editor-container" />
+        <Chatbot />
 
-        <div className="flex justify-end mt-3">
-          <button
-            disabled={!canSave}
-            onClick={handlePostSave}
-            className={`px-4 py-2 rounded-md transition-all duration-300 cursor-pointer ${
-              canSave
-                ? "bg-green-500 hover:bg-green-600 text-white dark:bg-purple-400 dark:hover:bg-purple-500"
-                : "bg-green-700 text-gray-200 dark:bg-purple-500 cursor-not-allowed"
-            }`}
-          >
-            Publish Post
-          </button>
+        <div className="flex justify-center mt-3">
+          <div className="relative group">
+            <button
+              disabled={!canSave}
+              onClick={handlePostSave}
+              className={`px-4 py-2 rounded-md transition-all duration-300 cursor-pointer ${
+                canSave
+                  ? "bg-green-500 hover:bg-green-600 text-white dark:bg-green-400 dark:hover:bg-green-500"
+                  : "bg-green-700 text-gray-200 dark:bg-purple-500 cursor-not-allowed"
+              }`}
+            >
+              Publish Post
+            </button>
+
+            {!canSave && (
+              <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs text-sm text-white bg-gray-800 px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                Content is not enough.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
