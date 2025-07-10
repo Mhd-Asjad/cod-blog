@@ -178,15 +178,11 @@
 
 ### Planned Features
 - [ ] **Mobile App** (React Native)
-- [ ] **Advanced Search** with filters and tags
 - [ ] **Post Categories** and tagging system
 - [ ] **Email Notifications** for important updates
-- [ ] **Content Moderation** with AI assistance
 - [ ] **Analytics Dashboard** for content creators
-- [ ] **Dark Mode** toggle
 - [ ] **Multi-language Support**
 - [ ] **Post Scheduling** functionality
-- [ ] **Image Upload** and optimization
 
 ### Technical Improvements
 - [ ] **Docker Containerization**
@@ -198,8 +194,16 @@
 
 ## 👨‍💻 Contributors
 
-- **Amraz Rafeeque** — Full Stack Developer, Feature Integrator, UI/UX Designer
-- **Mhd Asjad** — Notification System, Real-time Features, Collaboration Management
+### ✨ Amraz Rafeeque  
+- Integrated core features across frontend and backend  
+- Designed and developed intuitive UI/UX components  
+- Managed seamless communication between Django and React  
+
+### ⚙️ Mhd Asjad  
+- Built and optimized the notification system  
+- Implemented real-time interactions using WebSockets  
+- Handled collaboration logic and state synchronization  
+
 
 ## 🛠️ Development Background
 
