@@ -8,6 +8,8 @@ import {
   User,
   X,
   Bell,
+  Bookmark,
+  BookmarkCheck,
 } from "lucide-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
@@ -74,7 +76,7 @@ const Nav = () => {
     if (!reduxUser?.id) return;
 
     const socket = new WebSocket(
-      `ws://localhost:8000/ws/notifications/${reduxUser.id}/`
+      `${import.meta.VITE_WEBSOCKET_URL}/ws/notifications/${reduxUser.id}/`
     );
     setSocket(socket);
 
@@ -152,7 +154,6 @@ const Nav = () => {
     setMobileMenuOpen((prev) => !prev);
   };
 
-  console.log("component rerendered");
   return (
     <>
       <nav className="flex items-center justify-between px-6 md:px-19 py-5 bg-zinc-100 border-b-2 border-gray-300 dark:bg-gray-800 transition-colors duration-300">
@@ -210,7 +211,7 @@ const Nav = () => {
               >
                 <Bell className="text-black dark:text-white" size={30} />
                 {unread_count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gray-500 dark:bg-purple-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-gray-300  dark:bg-purple-500 dark:text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                     {unread_count}
                   </span>
                 )}
@@ -246,6 +247,21 @@ const Nav = () => {
                         >
                           <User className="mr-2 h-4 w-4" />
                           Profile
+                        </button>
+                      )}
+                    </MenuItem>
+                    <MenuItem>
+                      {({ active }) => (
+                        <button
+                          onClick={() => navigateTo(`/saved-posts`)}
+                          className={`${
+                            active
+                              ? "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-white"
+                              : "text-gray-900 dark:text-gray-200"
+                          } group flex w-full items-center rounded-md px-3 py-2 text-sm`}
+                        >
+                          <BookmarkCheck className="mr-2 h-4 w-4" />
+                          Saved Post
                         </button>
                       )}
                     </MenuItem>

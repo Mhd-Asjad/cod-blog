@@ -135,14 +135,19 @@ const ShowNotifications = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
-        <HashLoader color="#8a2be2" size={60} />
+      <div className="h-screen flex items-center justify-center text-center">
+        <div className="flex flex-col items-center">
+          <HashLoader color="#8B5CF6" size={60} />
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            Loading your Notification...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300">
       <Nav />
       <div className="sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 z-10">
         <div className="flex items-center justify-center px-4 py-3">
@@ -184,7 +189,7 @@ const ShowNotifications = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-8">
+      <div className="flex-1 h-screen overflow-y-auto px-4 pb-8">
         {getFilteredNotifications().length === 0 ? (
           <div className="text-center py-20">
             <Bell className="w-16 h-16 text-gray-400 dark:text-slate-600 mx-auto mb-4" />
@@ -197,7 +202,7 @@ const ShowNotifications = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-0">
+          <div className="space-y-0 ">
             {getFilteredNotifications().map((notification) => (
               <div
                 key={notification.id}

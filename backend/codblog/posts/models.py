@@ -11,10 +11,11 @@ class Post(models.Model):
     content = models.JSONField(null=True, blank=True)
     like = models.IntegerField(default=0)
     liked_by = models.ManyToManyField(user, related_name="liked_posts", blank=True)
+    saved_by = models.ManyToManyField(user, related_name="saved_posts", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.author.username} - {self.title}"
 
 
@@ -25,7 +26,7 @@ class Comment(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.post.title} - {self.comment[:11]}....."
     
 
@@ -41,7 +42,7 @@ class Follow(models.Model):
     class Meta:
         unique_together = ("follower", "following")
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
     
 class Notifications(models.Model):
@@ -59,6 +60,6 @@ class Notifications(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def _str_(self):
+    def __str__(self):
         notification = f'notification for {self.post.title}' if self.notification_type == 'like' and self.post else 'notification' 
         return f"{self.sender.username} {self.notification_type} {notification}"

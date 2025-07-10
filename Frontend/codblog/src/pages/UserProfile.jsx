@@ -597,10 +597,10 @@ const UserProfile = () => {
                               </div>
                             )}
 
-                            {post.comments_count !== undefined && (
+                            {post.comment_count !== undefined && (
                               <div className="flex items-center">
                                 <MessageCircle size={14} className="mr-1" />
-                                {post.comments_count}
+                                {post.comment_count}
                               </div>
                             )}
                           </div>
@@ -649,7 +649,7 @@ const UserProfile = () => {
                           </div>
                           <div className="flex items-center text-gray-600 dark:text-gray-400">
                             <MessageCircle size={16} className="mr-1" />
-                            <span>{post.comments_count || 0}</span>
+                            <span>{post.comment_count || 0}</span>
                           </div>
                         </div>
 

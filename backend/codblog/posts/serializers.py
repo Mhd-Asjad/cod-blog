@@ -45,22 +45,25 @@ class PostEditSerializer(serializers.ModelSerializer):
 
 class HomePostSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True)
+    comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = [
-            "id",
-            "author",
-            "title",
-            "like",
-            "created_at",
-        ]
+        fields = ["id", "author", "title", "like", "created_at", "comment_count"]
+
+    def get_comment_count(self, obj):
+        return Comment.objects.filter(post=obj, parent=None).count()
 
 
 class SimplePostSerializer(serializers.ModelSerializer):
+    comment_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
-        fields = ["id", "title", "created_at", "like"]
+        fields = ["id", "title", "created_at", "like", "comment_count"]
+
+    def get_comment_count(self, obj):
+        return Comment.objects.filter(post=obj, parent=None).count()
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -135,3 +138,5 @@ class CommentSerializer(serializers.ModelSerializer):
             data = obj.replies.all()
             return CommentSerializer(data, many=True).data
         return []
+
+

@@ -3,12 +3,112 @@ import { useNavigate, useParams } from "react-router-dom";
 import useApi from "../components/useApi";
 import { HashLoader } from "react-spinners";
 import { motion } from "motion/react";
-import { Calendar, Heart, HeartOff, User } from "lucide-react";
+import {
+  BookmarkCheck,
+  BookmarkPlus,
+  Calendar,
+  Heart,
+  HeartOff,
+  Share2,
+  User,
+  Copy,
+  Check,
+  Quote,
+} from "lucide-react";
 import Nav from "../components/Nav";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { toast } from "react-toastify";
 import Comments from "./Comments";
+import ActionButton from "@/components/ActionButton";
+import { useSelector } from "react-redux";
+
+const CodeBlock = ({ block }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(block.data.code);
+      setCopied(true);
+      toast.success("Code copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error("Failed to copy code");
+    }
+  };
+
+  return (
+    <div className="relative group my-6">
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden shadow-lg border border-gray-700">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2 bg-gray-800 dark:bg-gray-700 border-b border-gray-600">
+          <div className="flex items-center space-x-2">
+            <div className="flex space-x-1">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            </div>
+            <span className="text-gray-400 text-sm font-medium">Code</span>
+          </div>
+          <button
+            onClick={handleCopy}
+            className="flex items-center space-x-1 px-3 py-1 text-sm text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200"
+          >
+            {copied ? (
+              <>
+                <Check size={14} />
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy size={14} />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
+        
+        {/* Code Content */}
+        <div className="p-4 overflow-x-auto">
+          <pre className="text-sm leading-relaxed">
+            <code className="text-gray-100 whitespace-pre-wrap break-words font-mono">
+              {block.data.code}
+            </code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const QuoteBlock = ({ block }) => {
+  return (
+    <div className="my-8">
+      <div className="relative">
+        {/* Quote Icon */}
+        <div className="absolute -top-2 -left-2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+          <Quote size={16} className="text-white" />
+        </div>
+        
+        {/* Quote Content */}
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-6 ml-4 border-l-4 border-purple-500 shadow-md">
+          <blockquote className="relative">
+            <p className="text-lg italic text-gray-700 dark:text-gray-200 leading-relaxed font-medium break-words whitespace-pre-wrap">
+              "{block.data.text}"
+            </p>
+            {block.data.caption && (
+              <footer className="mt-4 pt-2 border-t border-purple-200 dark:border-purple-700">
+                <cite className="text-sm text-purple-600 dark:text-purple-400 font-semibold not-italic">
+                  — {block.data.caption}
+                </cite>
+              </footer>
+            )}
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const renderBlock = (block) => {
   switch (block.type) {
@@ -58,31 +158,10 @@ const renderBlock = (block) => {
       );
 
     case "code":
-      return (
-        <pre
-          key={block.id}
-          className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg text-sm break-words whitespace-pre-wrap overflow-x-auto"
-        >
-          <code className="block text-black dark:text-white">
-            {block.data.code}
-          </code>
-        </pre>
-      );
+      return <CodeBlock key={block.id} block={block} />;
 
     case "quote":
-      return (
-        <blockquote
-          key={block.id}
-          className="border-l-4 border-purple-500 pl-4 py-2 my-4 italic text-gray-600 dark:text-gray-300 break-words whitespace-pre-wrap"
-        >
-          <p>{block.data.text}</p>
-          {block.data.caption && (
-            <footer className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              — {block.data.caption}
-            </footer>
-          )}
-        </blockquote>
-      );
+      return <QuoteBlock key={block.id} block={block} />;
 
     case "embed":
       return (
@@ -112,13 +191,30 @@ const ShowPost = () => {
   const [likes, setLikes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isAuthenticated = useSelector((state) => state.auth.is_login);
+
+  const [savedPostIds, setSavedPostIds] = useState(new Set());
+
+  useEffect(() => {
+    const fetchSavedPostIds = async () => {
+      if (isAuthenticated) {
+        try {
+          const res = await api.get("posts/save-post/");
+          const savedIds = new Set(res.data.map((post) => post.id));
+          setSavedPostIds(savedIds);
+        } catch (error) {
+          console.error("Error fetching saved post ids");
+        }
+      }
+    };
+    fetchSavedPostIds();
+  }, [api, isAuthenticated]);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await api.get(`posts/show-post/${id}/`);
         if (response.status === 200) {
-          console.log(JSON.stringify(response.data));
           setPost(response.data);
           setIsLiked(response.data.is_liked);
           setLikes(response.data.like);
@@ -160,8 +256,13 @@ const ShowPost = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-zinc-100 dark:bg-gray-800 transition-colors duration-300">
-        <HashLoader color="#8a2be2" size={60} />
+      <div className="h-screen flex items-center justify-center text-center">
+        <div className="flex flex-col items-center">
+          <HashLoader color="#8B5CF6" size={60} />
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            Loading your Post...
+          </p>
+        </div>
       </div>
     );
   }
@@ -187,7 +288,7 @@ const ShowPost = () => {
       <div className="sticky top-0 z-50">
         <Nav />
       </div>
-      
+
       <div className="max-w-4xl mx-auto px-4 py-12 ">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -226,29 +327,55 @@ const ShowPost = () => {
                 </div>
               </div>
             </div>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <ActionButton
+                  postId={Number(id)}
+                  isSave={true}
+                  isSaved={savedPostIds.has(Number(id))}
+                  icon={
+                    savedPostIds.has(Number(id)) ? BookmarkCheck : BookmarkPlus
+                  }
+                  savePostIds={savedPostIds}
+                  setSavedPostIds={setSavedPostIds}
+                  className={`w-7 h-7 mb-4 text-gray-400 ${
+                    savedPostIds.has(Number(id)) && "text-purple-400"
+                  }`}
+                />
+              </div>
 
-            <div
-              className="flex flex-col items-center cursor-pointer transition-transform ease-in-out"
-              onClick={handleLikeToggle}
-            >
-              <motion.div
-                whileTap={{ scale: 1.2 }}
-                className="flex flex-col items-center"
+              <div>
+                <ActionButton
+                  postId={id}
+                  icon={Share2}
+                  isShare={true}
+                  className="w-7 h-7 mb-4 text-gray-400"
+                />
+              </div>
+
+              <div
+                className="flex flex-col items-center cursor-pointer transition-transform ease-in-out"
+                onClick={handleLikeToggle}
               >
-                {isLiked ? (
-                  <motion.div
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <HeartSolid className="w-7 h-7 text-purple-600" />
-                  </motion.div>
-                ) : (
-                  <HeartOutline className="w-7 h-7 text-gray-400" />
-                )}
-                <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">
-                  {likes} {likes === 1 ? "Like" : "Likes"}
-                </p>
-              </motion.div>
+                <motion.div
+                  whileTap={{ scale: 1.2 }}
+                  className="flex flex-col items-center"
+                >
+                  {isLiked ? (
+                    <motion.div
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <HeartSolid className="w-7 h-7 text-purple-600" />
+                    </motion.div>
+                  ) : (
+                    <HeartOutline className="w-7 h-7 text-gray-400" />
+                  )}
+                  <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">
+                    {likes} {likes === 1 ? "Like" : "Likes"}
+                  </p>
+                </motion.div>
+              </div>
             </div>
           </div>
 
@@ -260,7 +387,6 @@ const ShowPost = () => {
             )}
           </div>
         </motion.div>
-
 
         <Comments postId={id} />
       </div>

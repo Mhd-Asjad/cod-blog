@@ -107,11 +107,11 @@ const ShowUserDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="text-end">
-          <HashLoader color="#8b5cf6" size={60} />
-          <p className="mt-4 text-gray-600 dark:text-gray-300 text-center font-medium">
-            Loading profile...
+      <div className="h-screen flex items-center justify-center text-center">
+        <div className="flex flex-col items-center">
+          <HashLoader color="#8B5CF6" size={60} />
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            Loading User Profile...
           </p>
         </div>
       </div>
@@ -370,10 +370,10 @@ const ShowUserDetail = () => {
                               </div>
                             )}
 
-                            {post.comments_count !== undefined && (
+                            {post.comment_count !== undefined && (
                               <div className="flex items-center">
                                 <MessageCircle size={14} className="mr-1" />
-                                {post.comments_count}
+                                {post.comment_count}
                               </div>
                             )}
                           </div>
@@ -401,7 +401,7 @@ const ShowUserDetail = () => {
                           </div>
                           <div className="flex items-center text-gray-600 dark:text-gray-400">
                             <MessageCircle size={16} className="mr-1" />
-                            <span>{post.comments_count || 0}</span>
+                            <span>{post.comment_count || 0}</span>
                           </div>
                         </div>
 
