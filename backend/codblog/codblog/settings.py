@@ -55,8 +55,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     "dj_rest_auth.registration",
-    "rest_framework.authtoken"
-] 
+    "rest_framework.authtoken",
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -86,7 +86,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware"
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 
@@ -109,13 +109,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "codblog.wsgi.application"
 
-ASGI_APPLICATION = 'codblog.asgi.application'
+ASGI_APPLICATION = "codblog.asgi.application"
 
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
             "hosts": [(os.getenv("REDIS_HOST"), int(os.getenv("REDIS_PORT")))],
         },
     },
@@ -123,8 +123,7 @@ CHANNEL_LAYERS = {
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    'allauth.account.auth_backends.AuthenticationBackend',
-
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 # Database
@@ -135,16 +134,16 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DATABASE_NAME"),
         "USER": os.getenv("DATABASE_USER"),
-        "PASSWORD": os.getenv('DATABASE_PASSWORD','postgres'),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "postgres"),
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
 }
 
-print(os.getenv('DATABASE_PASSWORD'))
+print(os.getenv("DATABASE_PASSWORD"))
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -182,7 +181,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'codblog/staticfiles'
+STATIC_ROOT = BASE_DIR / "codblog/staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
@@ -204,11 +203,11 @@ CORS_ALLOW_ORIGINS = [
 
 SITE_ID = 1
 
-LOGIN_REDIRECT_URL = '/callback/'
+LOGIN_REDIRECT_URL = "/callback/"
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google' : {
-        "APP" : {
+    "google": {
+        "APP": {
             "client_id": os.getenv("CLIENT_ID"),
             "secret": os.getenv("CLIENT_SECRET"),
             "key": "",
