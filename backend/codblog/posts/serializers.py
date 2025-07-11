@@ -138,5 +138,3 @@ class CommentSerializer(serializers.ModelSerializer):
             data = obj.replies.all()
             return CommentSerializer(data, many=True).data
         return []
-
-

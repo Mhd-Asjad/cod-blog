@@ -22,17 +22,19 @@ def notify_on_comment(sender, instance, created, **kwargs):
                 post_id=instance.post.id,
                 comment_id=instance.id,
             )
-            count = Notifications.objects.filter(recipient=instance.post.author , is_read=False).count()
+            count = Notifications.objects.filter(
+                recipient=instance.post.author, is_read=False
+            ).count()
             channel_layer = get_channel_layer()
-            
+
             async_to_sync(channel_layer.group_send)(
-                f'user_{instance.post.author.id}',
+                f"user_{instance.post.author.id}",
                 {
-                    "type" : "send_notification",
-                    "event_type" : "comment_notification",
-                    "message" : f"you have new comment on {instance.post.title[:11]}",
-                    "unread_count" : count
-                }
+                    "type": "send_notification",
+                    "event_type": "comment_notification",
+                    "message": f"you have new comment on {instance.post.title[:11]}",
+                    "unread_count": count,
+                },
             )
 
 
@@ -62,6 +64,7 @@ def notify_on_follow(sender, instance, created, **kwargs):
                 "unread_count": count,
             },
         )
+
 
 @receiver(post_delete, sender=Follow)
 def remove_follow_notification(sender, instance, **kwargs):
@@ -107,8 +110,6 @@ def notify_on_like(sender, instance, action, pk_set, **kwargs):
                 notification_type="like",
                 post=instance,
             ).exists()
-            
-                
 
             if not exists and instance.author != user:
                 print("like is created")
